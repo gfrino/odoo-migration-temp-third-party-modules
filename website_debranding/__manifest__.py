@@ -1,0 +1,10 @@
+{'name': 'Remove Odoo Branding from Website',
+ 'version': '20.0.1.0.2',
+ 'author': 'Tecnativa, Odoo Community Association (OCA)',
+ 'website': 'https://github.com/OCA/server-brand',
+ 'license': 'LGPL-3',
+ 'category': 'Website',
+ 'depends': ['website'],
+ 'data': ['templates/disable_odoo.xml'],
+ 'installable': True,
+ 'post_init_hook': 'post_init_hook'}

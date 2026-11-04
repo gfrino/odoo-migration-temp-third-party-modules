@@ -1,0 +1,1 @@
+{'name': 'Projects List View', 'version': '20.0.1.0.1', 'category': 'Project', 'website': 'https://github.com/OCA/project', 'author': 'CorporateHub, Odoo Community Association (OCA)', 'license': 'AGPL-3', 'installable': True, 'application': False, 'summary': 'Projects list view', 'depends': ['project'], 'data': ['views/project_project.xml']}

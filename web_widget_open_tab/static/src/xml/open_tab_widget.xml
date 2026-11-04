@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="web_widget_open_tab.openTab">
+        <a t-if="this.props.record.resId" class="btn open_tab_widget fa fa-external-link"
+           t-att-href="this.reference" target="_blank" rel="noopener noreferrer"
+           t-on-click="this.openNewTab" t-att-title="this.props.title" t-att-aria-label="this.props.title"/>
+    </t>
+</templates>

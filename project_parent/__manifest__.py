@@ -1,0 +1,1 @@
+{'name': 'Project Parent', 'version': '20.0.1.0.1', 'license': 'LGPL-3', 'category': 'project', 'author': 'Therp B.V., Elico Corp, Odoo Community Association (OCA)', 'website': 'https://github.com/OCA/project', 'depends': ['project'], 'data': ['views/project_parent_views.xml'], 'demo': ['demo/project_project_demo.xml']}

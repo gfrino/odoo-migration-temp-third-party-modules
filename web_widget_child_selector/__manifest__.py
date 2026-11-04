@@ -1,0 +1,10 @@
+{'name': 'Web Widget Child Selector',
+ 'summary': 'Widget used for navigation on hierarchy fields',
+ 'version': '20.0.1.0.2',
+ 'license': 'AGPL-3',
+ 'author': 'Creu Blanca,Odoo Community Association (OCA), ticinoWEB',
+ 'website': 'https://github.com/OCA/web',
+ 'depends': ['web'],
+ 'assets': {'web.assets_backend': ['web_widget_child_selector/static/src/js/**/*',
+                                   'web_widget_child_selector/static/src/scss/**/*',
+                                   'web_widget_child_selector/static/src/xml/**/*']}}

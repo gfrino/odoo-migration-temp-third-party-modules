@@ -1,0 +1,11 @@
+{'name': 'Web Access Rules Buttons',
+ 'summary': 'Disable Edit button if access rules prevent this action',
+ 'version': '20.0.1.0.4',
+ 'author': 'Camptocamp, Onestein, Odoo Community Association (OCA), ticinoWEB',
+ 'license': 'AGPL-3',
+ 'category': 'Web',
+ 'depends': ['web'],
+ 'website': 'https://github.com/OCA/web',
+ 'data': [],
+ 'installable': True,
+ 'assets': {'web.assets_backend': ['web_access_rule_buttons/static/src/js/form_controller.js']}}

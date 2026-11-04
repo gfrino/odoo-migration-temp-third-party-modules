@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="web_widget_child_selector.FieldChildSelector">
+        <div class="o_child_selector">
+            <Many2One t-props="this.m2oProps"/>
+            <div t-if="!this.props.readonly" class="d-flex flex-wrap gap-1 mt-1">
+                <button type="button" class="btn btn-sm btn-light" t-on-click="() => this.select(false)">Root</button>
+                <button t-foreach="this.hierarchy.parents" t-as="parent" t-key="parent[0]" type="button"
+                        class="btn btn-sm btn-light" t-on-click="() => this.select(parent)"><t t-out="parent[1]"/></button>
+                <button t-foreach="this.hierarchy.childs" t-as="child" t-key="child[0]" type="button"
+                        class="btn btn-sm btn-outline-secondary" t-on-click="() => this.select(child)"><t t-out="child[1]"/></button>
+                <span t-if="this.hierarchy.failed" class="text-muted">Hierarchy unavailable. Use the search field.</span>
+            </div>
+        </div>
+    </t>
+</templates>

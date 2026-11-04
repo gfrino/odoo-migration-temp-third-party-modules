@@ -1,0 +1,7 @@
+id,name,model_id/id,group_id/id,operation,domain
+access_project_role_assignee,project.role,model_project_role,base.group_user,r,
+access_project_role_user,project.role,model_project_role,project.group_project_user,r,
+access_project_role_manager,project.role,model_project_role,base.group_system,crud,
+access_project_assignment_assignee,project.assignment,model_project_assignment,base.group_user,r,
+access_project_assignment_user,project.assignment,model_project_assignment,project.group_project_user,r,
+access_project_assignment_manager,project.assignment,model_project_assignment,project.group_project_manager,crud,
