@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="tw_littleinka_kpi.Dashboard">
+        <div class="o_action o_li_kpi h-100 overflow-auto">
+            <div class="o_li_kpi_wrap">
+                <!-- Intestazione e filtri -->
+                <header class="o_li_kpi_head">
+                    <div class="d-flex align-items-center gap-2">
+                        <button t-if="this.state.detail" type="button" class="btn btn-light o_li_kpi_back"
+                                t-on-click="() => this.closeFamily()" aria-label="Indietro">
+                            <i class="oi" data-icon="arrow_back" aria-hidden="true"/>
+                        </button>
+                        <div class="flex-grow-1 min-w-0">
+                            <h1 class="o_li_kpi_title text-truncate">
+                                <t t-if="this.state.detail" t-out="this.state.detail.family.name"/>
+                                <t t-else="">Vendite</t>
+                            </h1>
+                            <div class="o_li_kpi_sub text-muted text-truncate">
+                                <t t-out="this.sedeName"/> · <t t-out="this.periodLabel"/>
+                            </div>
+                        </div>
+                        <i t-if="this.state.loading" class="oi oi-spin text-muted" data-icon="progress_activity" aria-hidden="true"/>
+                    </div>
+                    <div class="o_li_kpi_chips" role="group" aria-label="Periodo">
+                        <t t-foreach="this.periods" t-as="period" t-key="period.key">
+                            <button type="button" class="btn btn-sm"
+                                    t-att-class="period.key === this.state.params.period ? 'btn-primary' : 'btn-light'"
+                                    t-on-click="() => this.setPeriod(period.key)" t-out="period.label"/>
+                        </t>
+                    </div>
+                    <div class="o_li_kpi_filters">
+                        <t t-if="this.state.params.period === 'custom'">
+                            <label class="visually-hidden" for="li_kpi_from">Dal</label>
+                            <input id="li_kpi_from" type="date" class="form-control form-control-sm"
+                                   t-att-value="this.state.params.date_from" t-on-change="(ev) => this.onDate('date_from', ev)"/>
+                            <label class="visually-hidden" for="li_kpi_to">Al</label>
+                            <input id="li_kpi_to" type="date" class="form-control form-control-sm"
+                                   t-att-value="this.state.params.date_to" t-on-change="(ev) => this.onDate('date_to', ev)"/>
+                        </t>
+                        <label class="visually-hidden" for="li_kpi_sede">Sede</label>
+                        <select id="li_kpi_sede" class="form-select form-select-sm" t-on-change="(ev) => this.onSede(ev)">
+                            <option value="" t-att-selected="!this.state.params.sede_id">Tutte le sedi</option>
+                            <t t-foreach="this.state.data?.sedi || []" t-as="sede" t-key="sede.id">
+                                <option t-att-value="sede.id" t-att-selected="sede.id === this.state.params.sede_id" t-out="sede.name"/>
+                            </t>
+                        </select>
+                    </div>
+                </header>
+
+                <t t-if="this.state.data and !this.state.detail" t-call="tw_littleinka_kpi.DashboardMain"/>
+                <t t-if="this.state.data and this.state.detail" t-call="tw_littleinka_kpi.DashboardFamily"/>
+            </div>
+        </div>
+    </t>
+
+    <!-- Schermata principale -->
+    <t t-name="tw_littleinka_kpi.DashboardMain">
+        <t t-set="data" t-value="this.state.data"/>
+        <t t-set="totals" t-value="data.totals"/>
+
+        <div t-if="data.unassigned_categories and data.is_manager" class="alert alert-warning o_li_kpi_alert" role="alert">
+            <span>Categorie senza famiglia: <strong t-out="data.unassigned_categories"/>. I loro pezzi finiscono in «Da assegnare».</span>
+            <button type="button" class="btn btn-sm btn-warning" t-on-click="() => this.openCategories()">Assegna</button>
+        </div>
+
+        <!-- Pezzi per famiglia -->
+        <section class="o_li_kpi_section">
+            <h2 class="o_li_kpi_h2">Pezzi venduti</h2>
+            <div class="o_li_kpi_families">
+                <t t-foreach="this.families" t-as="family" t-key="family.id or 'none'">
+                    <t t-set="change" t-value="this.delta(family.qty, family.prev_qty)"/>
+                    <button type="button" class="o_li_kpi_card o_li_kpi_family" t-att-class="'o_li_kpi_c' + (family.color or 0)"
+                            t-on-click="() => this.openFamily(family)">
+                        <span class="o_li_kpi_family_name" t-out="family.name"/>
+                        <span class="o_li_kpi_big" t-out="this.qty(family.qty)"/>
+                        <span class="o_li_kpi_split" aria-hidden="true">
+                            <span class="o_li_kpi_split_online" t-att-style="'width:' + this.pct(family.qty_online, family.qty) + '%'"/>
+                        </span>
+                        <span class="o_li_kpi_split_text">
+                            <span><i class="oi" data-icon="shopping_cart" aria-hidden="true"/> Online <strong t-out="this.qty(family.qty_online)"/></span>
+                            <span><i class="oi" data-icon="storefront" aria-hidden="true"/> Cassa <strong t-out="this.qty(family.qty_pos)"/></span>
+                        </span>
+                        <span t-if="change" class="o_li_kpi_delta" t-att-class="change.up ? 'text-success' : 'text-danger'">
+                            <t t-out="change.label"/> <span class="fw-normal" t-out="this.compareLabel"/>
+                        </span>
+                    </button>
+                </t>
+            </div>
+        </section>
+
+        <!-- Fatturato -->
+        <section class="o_li_kpi_section">
+            <h2 class="o_li_kpi_h2">Fatturato</h2>
+            <t t-set="change" t-value="this.delta(totals.amount, data.prev_totals.amount)"/>
+            <button type="button" class="o_li_kpi_card o_li_kpi_total" t-on-click="() => this.openSales([], 'Vendite', ['sales_type'])">
+                <span class="o_li_kpi_big" t-out="this.money(totals.amount)"/>
+                <span class="text-muted">
+                    <t t-out="totals.orders"/> ordini · scontrino medio <t t-out="this.money(totals.avg_ticket)"/>
+                </span>
+                <span t-if="change" class="o_li_kpi_delta" t-att-class="change.up ? 'text-success' : 'text-danger'">
+                    <t t-out="change.label"/> <span class="fw-normal" t-out="this.compareLabel"/>
+                </span>
+            </button>
+            <div class="o_li_kpi_pair">
+                <button type="button" class="o_li_kpi_card" t-on-click="() => this.openSales([['sales_type', '=', 'online']], 'Online', ['channel'])">
+                    <span class="o_li_kpi_label"><i class="oi" data-icon="shopping_cart" aria-hidden="true"/> Online</span>
+                    <span class="o_li_kpi_mid" t-out="this.money(totals.amount_online)"/>
+                    <span class="text-muted"><t t-out="totals.orders_online"/> ordini · <t t-out="this.pct(totals.amount_online, totals.amount)"/>%</span>
+                </button>
+                <button type="button" class="o_li_kpi_card" t-on-click="() => this.openSales([['sales_type', '=', 'pos']], 'Cassa', ['sede_id'])">
+                    <span class="o_li_kpi_label"><i class="oi" data-icon="storefront" aria-hidden="true"/> Cassa</span>
+                    <span class="o_li_kpi_mid" t-out="this.money(totals.amount_pos)"/>
+                    <span class="text-muted"><t t-out="totals.orders_pos"/> scontrini · <t t-out="this.pct(totals.amount_pos, totals.amount)"/>%</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Canali -->
+        <section class="o_li_kpi_section">
+            <h2 class="o_li_kpi_h2">Da dove arrivano</h2>
+            <div class="o_li_kpi_card o_li_kpi_list">
+                <t t-foreach="data.channels" t-as="channel" t-key="channel.key">
+                    <button type="button" class="o_li_kpi_row" t-on-click="() => this.openSales([['channel', '=', channel.key]], channel.label, ['date:day'])">
+                        <span class="o_li_kpi_row_head">
+                            <span t-out="channel.label"/>
+                            <span><strong t-out="this.money(channel.amount)"/> <span class="text-muted">· <t t-out="channel.orders"/></span></span>
+                        </span>
+                        <span class="o_li_kpi_bar"><span t-att-class="channel.key === 'pos' ? 'o_li_kpi_bar_pos' : 'o_li_kpi_bar_online'" t-att-style="'width:' + this.pct(channel.amount, this.maxChannel) + '%'"/></span>
+                    </button>
+                </t>
+            </div>
+        </section>
+
+        <!-- Sedi -->
+        <section t-if="data.by_sede.length" class="o_li_kpi_section">
+            <h2 class="o_li_kpi_h2">Sedi</h2>
+            <div class="o_li_kpi_card o_li_kpi_list">
+                <t t-foreach="data.by_sede" t-as="sede" t-key="sede.id or 'none'">
+                    <button type="button" class="o_li_kpi_row" t-on-click="() => this.pickSede(sede.id)" t-att-disabled="!sede.id">
+                        <span class="o_li_kpi_row_head">
+                            <span t-out="sede.name"/>
+                            <strong t-out="this.money(sede.amount)"/>
+                        </span>
+                        <span class="o_li_kpi_bar o_li_kpi_bar_split">
+                            <span class="o_li_kpi_bar_online" t-att-style="'width:' + this.pct(sede.amount_online, this.maxSede) + '%'"/>
+                            <span class="o_li_kpi_bar_pos" t-att-style="'width:' + this.pct(sede.amount_pos, this.maxSede) + '%'"/>
+                        </span>
+                        <span class="o_li_kpi_row_foot text-muted">
+                            <span>Online <t t-out="this.money(sede.amount_online)"/></span>
+                            <span>Cassa <t t-out="this.money(sede.amount_pos)"/></span>
+                        </span>
+                    </button>
+                </t>
+            </div>
+        </section>
+
+        <div class="o_li_kpi_more">
+            <button type="button" class="btn btn-light" t-on-click="() => this.openSales()">
+                <i class="oi" data-icon="table_chart" aria-hidden="true"/> Analisi vendite
+            </button>
+            <button type="button" class="btn btn-light" t-on-click="() => this.openProducts()">
+                <i class="oi" data-icon="restaurant" aria-hidden="true"/> Prodotti venduti
+            </button>
+        </div>
+    </t>
+
+    <!-- Dettaglio di una famiglia -->
+    <t t-name="tw_littleinka_kpi.DashboardFamily">
+        <t t-set="detail" t-value="this.state.detail"/>
+        <t t-set="family" t-value="this.families.find((f) => f.id === detail.family.id) || {}"/>
+
+        <section class="o_li_kpi_section">
+            <div class="o_li_kpi_pair o_li_kpi_pair3">
+                <div class="o_li_kpi_card">
+                    <span class="o_li_kpi_label">Totale</span>
+                    <span class="o_li_kpi_mid" t-out="this.qty(family.qty)"/>
+                    <span class="text-muted" t-out="this.money(family.amount)"/>
+                </div>
+                <div class="o_li_kpi_card">
+                    <span class="o_li_kpi_label"><i class="oi" data-icon="shopping_cart" aria-hidden="true"/> Online</span>
+                    <span class="o_li_kpi_mid" t-out="this.qty(family.qty_online)"/>
+                    <span class="text-muted" t-out="this.money(family.amount_online)"/>
+                </div>
+                <div class="o_li_kpi_card">
+                    <span class="o_li_kpi_label"><i class="oi" data-icon="storefront" aria-hidden="true"/> Cassa</span>
+                    <span class="o_li_kpi_mid" t-out="this.qty(family.qty_pos)"/>
+                    <span class="text-muted" t-out="this.money(family.amount_pos)"/>
+                </div>
+            </div>
+        </section>
+
+        <section t-if="detail.days.length > 1" class="o_li_kpi_section">
+            <h2 class="o_li_kpi_h2">Giorno per giorno</h2>
+            <div class="o_li_kpi_card o_li_kpi_days">
+                <t t-foreach="detail.days" t-as="day" t-key="day.day">
+                    <div class="o_li_kpi_day" t-att-title="this.dayLabel(day.day) + ': ' + this.qty(day.qty_online + day.qty_pos)">
+                        <span class="o_li_kpi_day_bar">
+                            <span class="o_li_kpi_bar_pos" t-att-style="'height:' + this.pct(day.qty_pos, this.maxDay) + '%'"/>
+                            <span class="o_li_kpi_bar_online" t-att-style="'height:' + this.pct(day.qty_online, this.maxDay) + '%'"/>
+                        </span>
+                        <span class="o_li_kpi_day_label" t-out="this.dayTick(day.day, day_index)"/>
+                    </div>
+                </t>
+            </div>
+            <div class="o_li_kpi_legend text-muted">
+                <span><span class="o_li_kpi_dot o_li_kpi_bar_online"/> Online</span>
+                <span><span class="o_li_kpi_dot o_li_kpi_bar_pos"/> Cassa</span>
+            </div>
+        </section>
+
+        <section t-if="detail.sedi.length" class="o_li_kpi_section">
+            <h2 class="o_li_kpi_h2">Per sede</h2>
+            <div class="o_li_kpi_card o_li_kpi_list">
+                <t t-foreach="detail.sedi" t-as="sede" t-key="sede.id or 'none'">
+                    <div class="o_li_kpi_row">
+                        <span class="o_li_kpi_row_head">
+                            <span t-out="sede.name"/>
+                            <strong t-out="this.qty(sede.qty_online + sede.qty_pos)"/>
+                        </span>
+                        <span class="o_li_kpi_bar o_li_kpi_bar_split">
+                            <span class="o_li_kpi_bar_online" t-att-style="'width:' + this.pct(sede.qty_online, this.maxDetailSede) + '%'"/>
+                            <span class="o_li_kpi_bar_pos" t-att-style="'width:' + this.pct(sede.qty_pos, this.maxDetailSede) + '%'"/>
+                        </span>
+                        <span class="o_li_kpi_row_foot text-muted">
+                            <span>Online <t t-out="this.qty(sede.qty_online)"/></span>
+                            <span>Cassa <t t-out="this.qty(sede.qty_pos)"/></span>
+                        </span>
+                    </div>
+                </t>
+            </div>
+        </section>
+
+        <section t-if="detail.channels.length" class="o_li_kpi_section">
+            <h2 class="o_li_kpi_h2">Canale</h2>
+            <div class="o_li_kpi_card o_li_kpi_list">
+                <t t-foreach="detail.channels" t-as="channel" t-key="channel.key">
+                    <div class="o_li_kpi_row o_li_kpi_row_inline">
+                        <span t-out="channel.label"/>
+                        <strong t-out="this.qty(channel.qty)"/>
+                    </div>
+                </t>
+            </div>
+        </section>
+
+        <section class="o_li_kpi_section">
+            <h2 class="o_li_kpi_h2">Prodotti</h2>
+            <div class="o_li_kpi_card o_li_kpi_list">
+                <div t-if="!detail.products.length" class="text-muted p-2">Nessun pezzo venduto in questo periodo.</div>
+                <t t-foreach="detail.products" t-as="product" t-key="product_index">
+                    <div class="o_li_kpi_product">
+                        <span class="o_li_kpi_product_name" t-out="product.name"/>
+                        <span class="o_li_kpi_product_qty"><strong t-out="this.qty(product.qty_online + product.qty_pos)"/></span>
+                        <span class="o_li_kpi_product_split text-muted">
+                            Online <t t-out="this.qty(product.qty_online)"/> · Cassa <t t-out="this.qty(product.qty_pos)"/>
+                        </span>
+                    </div>
+                </t>
+            </div>
+        </section>
+
+        <div class="o_li_kpi_more">
+            <button type="button" class="btn btn-light" t-on-click="() => this.openFamilyProducts()">
+                <i class="oi" data-icon="table_chart" aria-hidden="true"/> Apri in tabella
+            </button>
+        </div>
+    </t>
+</templates>

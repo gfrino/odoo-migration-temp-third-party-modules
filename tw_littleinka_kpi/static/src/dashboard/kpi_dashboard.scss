@@ -1,0 +1,272 @@
+// Little Inka KPI: phone first (one column), two to four columns on wider screens.
+// Colours come from Odoo's SCSS variables (compiled again for the dark bundle), so light and dark mode both work.
+
+$li-kpi-colors: (
+    0: #6c757d, 1: #ee2d2d, 2: #dc8534, 3: #e8bb1d, 4: #5794dd, 5: #9f628f,
+    6: #db8865, 7: #41a9a2, 8: #304be0, 9: #ee2f8a, 10: #61c36e, 11: #9872e6,
+);
+
+.o_li_kpi {
+    --li-online: #1da4a7;
+    --li-pos: #f0a03a;
+    --li-page: #{$o-webclient-background-color};
+    --li-card: #{$o-view-background-color};
+    --li-border: #{$border-color};
+    --li-soft: #{$o-gray-200};
+    --li-muted: #{$text-muted};
+    --li-text: #{$body-color};
+    display: block;
+    width: 100%;
+    background: var(--li-page);
+
+    .o_li_kpi_wrap {
+        width: 100%;
+        min-width: 0;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 12px 16px 32px;
+    }
+
+    .o_li_kpi_head {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        margin: -12px -16px 12px;
+        padding: 12px 16px 10px;
+        background: var(--li-card);
+        box-shadow: 0 1px 0 var(--li-border);
+    }
+    .o_li_kpi_title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    .o_li_kpi_sub { font-size: .85rem; }
+    .o_li_kpi_back { width: 40px; height: 40px; border-radius: 50%; flex: none; display: inline-flex; align-items: center; justify-content: center; padding: 0; }
+
+    .o_li_kpi_chips {
+        display: flex;
+        gap: 6px;
+        margin-top: 10px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        &::-webkit-scrollbar { display: none; }
+        .btn { flex: none; border-radius: 999px; white-space: nowrap; min-height: 34px; }
+    }
+    .o_li_kpi_filters {
+        display: flex;
+        gap: 6px;
+        margin-top: 8px;
+        .form-control, .form-select { min-height: 36px; }
+        .form-select { max-width: 260px; }
+    }
+
+    .o_li_kpi_section { margin-top: 18px; }
+    .o_li_kpi_h2 {
+        font-size: .8rem;
+        font-weight: 600;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: var(--li-muted);
+        margin: 0 0 8px;
+    }
+    .o_li_kpi_alert {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin: 12px 0 0;
+        .btn { flex: none; }
+    }
+
+    // Cards: buttons when they open something, divs otherwise.
+    .o_li_kpi_card {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        width: 100%;
+        min-width: 0;
+        padding: 14px;
+        border: 1px solid var(--li-border);
+        border-radius: 14px;
+        background: var(--li-card);
+        color: inherit;
+        text-align: left;
+    }
+    button.o_li_kpi_card {
+        cursor: pointer;
+        transition: background-color .15s;
+        &:hover, &:focus-visible { background: var(--li-soft); }
+    }
+    .o_li_kpi_big { font-size: 2rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+    .o_li_kpi_mid { font-size: 1.35rem; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+    .o_li_kpi_label { font-size: .85rem; font-weight: 600; color: var(--li-muted); }
+    .o_li_kpi_delta { font-size: .8rem; font-weight: 600; }
+
+    .o_li_kpi_families {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+    .o_li_kpi_family {
+        --li-accent: #6c757d;
+        background: color-mix(in srgb, var(--li-accent) 9%, var(--li-card));
+        border-color: color-mix(in srgb, var(--li-accent) 30%, var(--li-border));
+    }
+    @each $index, $color in $li-kpi-colors {
+        .o_li_kpi_c#{$index} { --li-accent: #{$color}; }
+    }
+    .o_li_kpi_family_name {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+        &::before {
+            content: "";
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--li-accent);
+        }
+    }
+    .o_li_kpi_split {
+        display: block;
+        width: 100%;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--li-pos);
+        overflow: hidden;
+        margin-top: 4px;
+    }
+    .o_li_kpi_split_online { display: block; height: 100%; background: var(--li-online); }
+    .o_li_kpi_split_text {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 2px 8px;
+        width: 100%;
+        font-size: .8rem;
+        color: var(--li-muted);
+        strong { color: var(--li-text); }
+    }
+
+    .o_li_kpi_total { margin-bottom: 10px; }
+    .o_li_kpi_pair {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+    .o_li_kpi_pair3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .o_li_kpi_list { padding: 4px; gap: 0; }
+    .o_li_kpi_row {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        width: 100%;
+        padding: 10px;
+        border: 0;
+        border-radius: 10px;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        & + & { border-top: 1px solid var(--li-border); border-radius: 0; }
+    }
+    button.o_li_kpi_row:not(:disabled) {
+        cursor: pointer;
+        &:hover, &:focus-visible { background: var(--li-soft); }
+    }
+    .o_li_kpi_row_inline { flex-direction: row; justify-content: space-between; }
+    .o_li_kpi_row_head, .o_li_kpi_row_foot {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-variant-numeric: tabular-nums;
+    }
+    .o_li_kpi_row_foot { font-size: .8rem; }
+    .o_li_kpi_bar {
+        display: flex;
+        width: 100%;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--li-soft);
+        overflow: hidden;
+        > span { display: block; height: 100%; background: var(--li-online); }
+    }
+    .o_li_kpi_bar_online { background: var(--li-online) !important; }
+    .o_li_kpi_bar_pos { background: var(--li-pos) !important; }
+
+    .o_li_kpi_days {
+        flex-direction: row;
+        align-items: stretch;
+        gap: 3px;
+        height: 160px;
+        overflow-x: auto;
+    }
+    .o_li_kpi_day {
+        display: flex;
+        flex-direction: column;
+        flex: 1 0 18px;
+        min-width: 18px;
+        gap: 4px;
+    }
+    .o_li_kpi_day_bar {
+        display: flex;
+        flex-direction: column-reverse;
+        flex: 1;
+        border-radius: 4px;
+        overflow: hidden;
+        background: var(--li-soft);
+        > span { display: block; width: 100%; }
+    }
+    .o_li_kpi_day_label { font-size: .65rem; color: var(--li-muted); text-align: center; white-space: nowrap; }
+    .o_li_kpi_legend {
+        display: flex;
+        gap: 16px;
+        margin-top: 6px;
+        font-size: .8rem;
+    }
+    .o_li_kpi_dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        vertical-align: middle;
+    }
+
+    .o_li_kpi_product {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 2px 8px;
+        padding: 10px;
+        & + & { border-top: 1px solid var(--li-border); }
+    }
+    .o_li_kpi_product_name { overflow-wrap: anywhere; }
+    .o_li_kpi_product_qty { text-align: right; font-variant-numeric: tabular-nums; }
+    .o_li_kpi_product_split { grid-column: 1 / -1; font-size: .8rem; }
+
+    .o_li_kpi_more {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 18px;
+        .btn { flex: 1 1 200px; min-height: 42px; }
+    }
+
+    @media (min-width: 768px) {
+        .o_li_kpi_wrap { padding: 16px 24px 40px; }
+        .o_li_kpi_head { margin: -16px -24px 16px; padding: 16px 24px 12px; }
+        .o_li_kpi_families { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    @media (max-width: 420px) {
+        .o_li_kpi_big { font-size: 1.7rem; }
+        .o_li_kpi_pair3 {
+            gap: 6px;
+            .o_li_kpi_card { padding: 10px; }
+            .o_li_kpi_mid { font-size: 1.15rem; }
+            .o_li_kpi_label, .text-muted { font-size: .75rem; }
+        }
+    }
+}

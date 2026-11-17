@@ -1,0 +1,20 @@
+<odoo>
+ <record id="view_solar_template_scope" model="ir.ui.view">
+  <field name="name">sale.order.solar.template.scope</field><field name="model">sale.order</field>
+  <field name="inherit_id" ref="sale_management.sale_order_form_quote"/>
+  <field name="arch" type="xml">
+   <field name="sale_order_template_id" position="attributes"><attribute name="domain">[('is_light_offer','=',False),('template_type','=','quotation'),'|',('company_id','=',False),('company_id','=',company_id)]</attribute></field>
+  </field>
+ </record>
+ <record id="view_template_light_flag" model="ir.ui.view">
+  <field name="name">sale.order.template.light.flag</field><field name="model">sale.order.template</field>
+  <field name="inherit_id" ref="sale_management.sale_order_template_view_form"/>
+  <field name="arch" type="xml"><field name="name" position="after"><field name="is_light_offer"/></field></field>
+ </record>
+ <record id="action_light_templates" model="ir.actions.act_window">
+  <field name="name">Modelli Offerte light</field><field name="res_model">sale.order.template</field>
+  <field name="view_mode">list,form</field><field name="domain">[('is_light_offer','=',True)]</field>
+  <field name="context">{'default_is_light_offer': True}</field>
+ </record>
+ <menuitem id="menu_light_templates" name="Modelli Offerte light" parent="sale.sale_menu_root" action="action_light_templates" sequence="16" groups="sales_team.group_sale_manager"/>
+</odoo>

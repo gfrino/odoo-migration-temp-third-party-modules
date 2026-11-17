@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_kpi_sede_list" model="ir.ui.view">
+        <field name="name">tw.littleinka.kpi.sede.list</field>
+        <field name="model">tw.littleinka.kpi.sede</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="pos_config_ids" widget="many2many_tags"/>
+                <field name="key_hint"/>
+                <field name="last_sync"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_kpi_sede_form" model="ir.ui.view">
+        <field name="name">tw.littleinka.kpi.sede.form</field>
+        <field name="model">tw.littleinka.kpi.sede</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_generate_key" type="object" string="Crea la chiave per il sito" class="btn-primary"
+                            invisible="key_hint" groups="tw_littleinka_kpi.group_kpi_manager"/>
+                    <button name="action_generate_key" type="object" string="Crea una chiave nuova" invisible="not key_hint"
+                            groups="tw_littleinka_kpi.group_kpi_manager"
+                            confirm="La chiave attuale smette subito di funzionare: dopo va inserita quella nuova nel sito della sede. Continuare?"/>
+                    <button name="action_revoke_key" type="object" string="Disattiva la chiave" invisible="not key_hint"
+                            groups="tw_littleinka_kpi.group_kpi_manager"
+                            confirm="Il sito della sede non potrà più inviare ordini finché non crei una chiave nuova. Continuare?"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_orders" type="object" class="oe_stat_button" icon="shopping_bag">
+                            <field name="order_count" widget="statinfo" string="Ordini online"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archiviata" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="es. Bellinzona"/></h1>
+                    </div>
+                    <group>
+                        <group string="Vendite in cassa">
+                            <field name="pos_config_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                        </group>
+                        <group string="Vendite online">
+                            <field name="website_url" widget="url" invisible="not website_url"/>
+                            <field name="key_hint" invisible="not key_hint"/>
+                            <field name="key_date" invisible="not key_hint"/>
+                            <field name="last_sync"/>
+                            <div colspan="2" class="text-muted" invisible="key_hint">
+                                Crea la chiave con il pulsante in alto e incollala nel sito della sede,
+                                in WooCommerce → Odoo KPI, insieme all'indirizzo di Odoo.
+                            </div>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="color" widget="color_picker"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="active" invisible="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_kpi_key_wizard_form" model="ir.ui.view">
+        <field name="name">tw.littleinka.kpi.key.wizard.form</field>
+        <field name="model">tw.littleinka.kpi.key.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <div class="alert alert-warning" role="alert">
+                    Copia la chiave adesso: per sicurezza Odoo non la mostra più. Se la perdi, crea una chiave nuova.
+                </div>
+                <group>
+                    <field name="sede_id"/>
+                    <field name="odoo_url" widget="CopyClipboardChar"/>
+                    <field name="key" widget="CopyClipboardChar"/>
+                </group>
+                <p class="text-muted">
+                    Nel sito della sede: WooCommerce → Odoo KPI → incolla indirizzo e chiave → «Salva e prova».
+                </p>
+                <footer>
+                    <button name="action_done" type="object" string="Fatto, l'ho copiata" class="btn-primary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_kpi_sede" model="ir.actions.act_window">
+        <field name="name">Sedi</field>
+        <field name="res_model">tw.littleinka.kpi.sede</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aggiungi la prima sede</p>
+            <p>Per ogni sede: le sue casse e la chiave che il sito usa per inviare gli ordini.</p>
+        </field>
+    </record>
+</odoo>

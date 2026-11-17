@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <template id="pons_external_layout_standard" inherit_id="web.external_layout_standard">
+        <xpath expr="//div[contains(@t-attf-class, ' header')]" position="replace">
+            <div t-attf-class="header o_company_#{company.id}_layout">
+                <table class="table-borderless w-100" style="border-bottom: 1px solid black;"><tr><td style="width:25%;padding-bottom:4px;vertical-align:top;"><img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height:75px;" alt="Logo" /></td><td class="text-end" style="width:75%;padding-top:22px;vertical-align:top;" name="moto"><div t-field="company.report_header" /></td></tr></table></div>
+        </xpath>
+        <xpath expr="//t[@t-call='web.external_layout_footer_content']" position="attributes"><attribute name="is_tagline_footer">False</attribute></xpath></template>
+    <record id="pons_product_list_taxes" model="ir.ui.view">
+        <field name="name">Pons product list taxes</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view" />
+        <field name="arch" type="xml">
+            <field name="categ_id" position="after">
+                <field name="taxes_id" widget="many2many_tags" optional="show" />
+            </field>
+        </field>
+    </record>
+    <record id="pons_company_mobile" model="ir.ui.view">
+        <field name="name">Pons company mobile phone</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form" />
+        <field name="arch" type="xml">
+            <field name="phone" position="after"><field name="mobile" widget="phone" /></field>
+        </field>
+    </record>
+<record id="pons_journal_discount_marker" model="ir.ui.view"><field name="name">Pons journal discount marker</field><field name="model">account.move</field><field name="inherit_id" ref="account.view_move_form" /><field name="arch" type="xml"><xpath expr="//page[@name='aml_tab']/field[@name='line_ids']/list/field[@name='balance']" position="after"><field name="is_tw_sconto" optional="show" /></xpath></field></record><template id="pons_invoice_original_totals" inherit_id="account.report_invoice_document">
+        <xpath expr="//t[@t-call='account.document_tax_totals']" position="replace">
+            <t t-if="o.so_taxes_id or o.sconto_tax or o.tw_disc or o.disc_after_iva">
+                <tr><td>Importo imponibile</td><td class="text-end"><span t-field="o.amount_untaxed"/></td></tr>
+                <tr t-if="o.sconto_amount"><td>Sconto</td><td class="text-end">− <span t-field="o.sconto_amount" t-options="{'widget':'monetary','display_currency':o.currency_id}"/></td></tr>
+                <tr t-if="o.tw_disc_amt"><td>Sconto aggiuntivo</td><td class="text-end">− <span t-field="o.tw_disc_amt" t-options="{'widget':'monetary','display_currency':o.currency_id}"/></td></tr>
+                <tr t-if="o.so_tax_after_discount"><td>IVA</td><td class="text-end"><span t-field="o.so_tax_after_discount" t-options="{'widget':'monetary','display_currency':o.currency_id}"/></td></tr>
+                <tr t-if="o.disc_after_iva"><td>Sconto dopo IVA</td><td class="text-end">− <span t-field="o.disc_after_iva" t-options="{'widget':'monetary','display_currency':o.currency_id}"/></td></tr>
+                <tr class="o_total"><td><strong>Totale</strong></td><td class="text-end"><strong t-field="o.amount_total"/></td></tr>
+            </t>
+            <t t-elif="o.tax_totals" t-call="account.document_tax_totals" tax_totals="dict(o.tax_totals, total_amount=o.amount_total)" currency="o.currency_id"/>
+        </xpath>
+    </template>
+</odoo>

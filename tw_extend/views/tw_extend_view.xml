@@ -1,0 +1,269 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+	<data>
+        <record id="view_edit_project_tw_extend" model="ir.ui.view">
+            <field name="name">view.project.project.form.tw.extend</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="project.edit_project" />
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='project_update_all_action']" position="before">
+                    <button class="oe_stat_button" type="action" name="%(project.act_project_project_2_project_task_all)d" icon="fa-tasks">
+                        <field string="Tasks In Progress" name="task_count" widget="statinfo" options="{'label_field': 'label_tasks'}" />
+                    </button>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_sale_order_template_view_form_tw_extend" model="ir.ui.view">
+            <field name="name">view.sale.order.template.form.tw.extend</field>
+            <field name="model">sale.order.template</field>
+            <field name="inherit_id" ref="sale_management.sale_order_template_view_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='order_lines']/field[@name='sale_order_template_line_ids']/list/column[@name='product_and_description']" position="before">
+                    <field name="category_id" string="Categoria" />
+                </xpath>
+                <xpath expr="//page[@name='order_lines']/field[@name='sale_order_template_line_ids']/list//field[@name='product_id']" position="attributes">
+                    <attribute name="domain">[('categ_id', '=', category_id)]</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_order_tree_tw_inherited" model="ir.ui.view">
+            <field name="name">view.sale.order.tree.inherit.tw</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_tree" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='user_id']" position="after">
+                    <field name="client_order_ref" optional="show" />
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_quotation_tree_with_onboarding_tw_inherited" model="ir.ui.view">
+            <field name="name">view.sale.order.tree.onboard.inherit.tw</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_quotation_tree_with_onboarding" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='user_id']" position="after">
+                    <field name="client_order_ref" optional="show" />
+                </xpath>
+            </field>
+        </record>
+
+        <record id="product_template_form_view_inherit_tw_pons" model="ir.ui.view">
+            <field name="name">view.project.template.form.tw.pons</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_only_form_view" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='barcode']" position="after">
+                    <field name="is_add_attachement" string="Aggiunge allegato" />
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_partner_form_tw_inherited" model="ir.ui.view">
+            <field name="name">view.res.partner.form.inherit.tw</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//sheet//h1" position="before">
+                    <field name="title" options="{'no_open': True}" placeholder="Titolo" />
+                </xpath>
+                <xpath expr="(//field[@name='phone'])[1]" position="after">
+                    <field name="mobile" widget="phone" placeholder="Cellulare" />
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_order_form_inherit_tw" model="ir.ui.view">
+            <field name="name">view.sale.order.form.tw</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//notebook/page[@name='order_lines']/field[@name='order_line']/list/column[@name='product_and_description']" position="before">
+                    <field name="category_id" string="Categoria" />
+                </xpath>
+                <xpath expr="//notebook/page[@name='order_lines']/field[@name='order_line']/list//field[@name='product_id']" position="attributes">
+                    <attribute name="domain">[('categ_id', '=', category_id),('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]</attribute>
+                </xpath>
+                <xpath expr="//notebook/page[@name='order_lines']/field[@name='order_line']/list//field[@name='product_template_id']" position="attributes">
+                    <attribute name="domain">[('categ_id', '=', category_id),('sale_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]</attribute>
+                </xpath>
+                <xpath expr="//field[@name='client_order_ref']" position="replace" />
+                <xpath expr="//field[@name='name']" position="attributes">
+                    <attribute name="readonly">False</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_draft']" position="before">
+                    <button name="action_calculate_data" type="object" string="Calcola incentivi" />
+                </xpath>
+                <xpath expr="//field[@name='date_order']" position="attributes">
+                    <attribute name="groups">!base.group_no_one</attribute>
+                </xpath>
+                <xpath expr="//div[hasclass('o_td_label')]" position="attributes">
+                    <attribute name="groups">!base.group_no_one</attribute>
+                </xpath>
+                <xpath expr="//field[@name='payment_term_id']" position="after">
+                    <field name="hide_prices" />
+                    <field name="validita_offerta_id" />
+                    <field name="fornitura_id" />
+                    <field name="solare_project_id" string="Project" readonly="1" />
+                    <field name="solare_task_id" string="Task" readonly="1" invisible="1" />
+                </xpath>
+
+                <xpath expr="//notebook/page[@name='order_lines']" position="before">
+                    <page name="solare" string="Solare">
+                        <group>
+                            <group name="posizione" string="Posizione">
+                                <field name="ubicazione_impianto" />
+                                <field name="CH1903_LV03" />
+                                <field name="wgs_84" />
+                                <label for="altitudine" />
+                                <div>
+                                    <field name="altitudine" style="width:60%;" /> m.s.l.m.
+                                </div>
+                                <field name="mappale" />
+                                <field name="client_order_ref" string="Riferimento offerta" />
+                                <separator string="First Page" />
+                                <field name="img1" string="Image 1" widget="image" />
+                                <field name="img2" string="Image 2" widget="image" />
+                                <separator string="Second Page" />
+                                <field name="img3" string="Image" widget="image" />
+                            </group>
+                            <group name="orientamento_del_generatore" string="Orientamento del generatore">
+                                <field name="azimuth" />
+                                <field name="pendenza_tetto" />
+                                <separator string="Dati tecnici dell'impianto" />
+                                <field name="potenza_totale" />
+                                <field name="superficie_dei_moduli" />
+                                <label for="produzione_annua_stimata" />
+                                <div>
+                                    <field name="produzione_annua_stimata" style="width:60%;" /> kWh
+                                </div>
+                                <field name="tipo_di_installazione" />
+                                <field name="autoconsumo" />
+                                <field name="facciata" />
+                                <field name="incentivo_id" />
+                                <field name="contributo_base" />
+                                <field name="pronovo_federale" />
+                                <field name="rimunerazione_federale" />
+                                <field name="contributo_comunale" />
+                            </group>
+                        </group>
+                    </page>
+                </xpath>
+                <xpath expr="//field[@name='validity_date']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+                <xpath expr="//group[@name='sale_total']" position="attributes">
+                    <attribute name="class">oe_subtotal_footer border-top-0 order-0 order-lg-1</attribute>
+                    <attribute name="col">2</attribute>
+                </xpath>
+                <xpath expr="//field[@name='tax_totals']" position="replace">
+                    <field name="amount_untaxed" widget="monetary" options="{'currency_field': 'currency_id'}" />
+
+
+                    <label for="sconto_dis_type" string="Ribasso" />
+                    <div>
+                        <field name="sconto_dis_type" class="oe_no_button" style="width: 48%" /> -
+                        <field name="sconto_tax" class="oe_no_button" style="width: 48%" />
+                    </div>
+                    <field name="sconto_amount" string="Importo ribasso" />
+                    <field name="after_sconto_amt" string="Totale dopo ribasso" />
+                    <label for="tw_dis_type" string="Sconto %" />
+                    <div>
+                        <field name="tw_dis_type" class="oe_no_button" style="width: 48%" /> -
+                        <field name="tw_disc" class="oe_no_button" style="width: 48%" />
+                    </div>
+                    <field name="tw_disc_amt" string="Importo sconto" />
+                    <field name="after_tw_amt" string="Totale dopo sconto" />
+                    <field name="so_taxes_id" widget="many2many_tags" string="IVA" />
+                    <field name="so_tax_after_discount" widget="monetary" options="{'currency_field': 'currency_id'}" />
+                    <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                        <label for="amount_total" />
+                        <button name="button_dummy" invisible="state not in ('draft', 'sent')" string="(update)" type="object" class="oe_edit_only oe_link" />
+                    </div>
+                    <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}" />
+                </xpath>
+            </field>
+        </record>
+
+        <record id="account_move_tree_inherit_pons" model="ir.ui.view">
+            <field name="name">account.move.view.tree.inherit.pons</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_out_invoice_tree" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='amount_untaxed_in_currency_signed']" position="replace">
+                    <field name="amount_untaxed" string="Tax Excluded" sum="Total" optional="show" />
+                </xpath>
+                <xpath expr="//field[@name='amount_total_in_currency_signed']" position="replace">
+                    <field name="amount_total" string="Total" sum="Total" decoration-bf="1" optional="show" />
+                </xpath>
+                </field>
+        </record>
+
+        <record id="account_move_form_inherit_pons" model="ir.ui.view">
+            <field name="name">account.move.view.form.inherit.pons</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form" />
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='invoice_user_id']" position="after">
+                    <field name="solare_id" />
+                </xpath>
+                <xpath expr="//field[@name='invoice_date']" position="after">
+                    <field name="data_fine_lavori" />
+                    <field name="data_fine_lavori_text" />
+                </xpath>
+                <xpath expr="//button[@name='preview_invoice']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_move_form_inherit_tw" model="ir.ui.view">
+            <field name="name">view.account.move.form.tw</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form" />
+            <field name="arch" type="xml">
+                <xpath expr="//notebook/page[@name='invoice_tab']/field[@name='invoice_line_ids']/list/column[@name='product_and_description']" position="before">
+                    <field name="category_id" string="Categoria" />
+                    <field name="is_tw_sconto" invisible="1" />
+                </xpath>
+                <xpath expr="//field[@name='tax_totals']" position="after">
+                    <field name="amount_untaxed" widget="monetary" options="{'currency_field': 'currency_id'}" />
+
+
+
+                    <label for="sconto_dis_type" string="Importo Sconto" />
+                    <div>
+                        <field name="sconto_dis_type" class="oe_no_button" style="width: 57%" />
+                        <field name="sconto_tax" class="oe_no_button" style="width: 41%" />
+                    </div>
+                    <field name="sconto_amount" />
+
+
+                    <label for="tw_dis_type" string="Sconto %" />
+                    <div>
+                        <field name="tw_dis_type" class="oe_no_button" style="width: 57%" />
+                        <field name="tw_disc" class="oe_no_button" style="width: 41%" />
+                    </div>
+                    <field name="tw_disc_amt" string="Importo sconto" />
+                    <field name="after_tw_amt" />
+                    <field name="so_taxes_id" widget="many2many_tags" string="IVA" />
+                    <field name="so_tax_after_discount" widget="monetary" options="{'currency_field': 'currency_id'}" />
+                    <field name="disc_declaration" string="Testo" />
+                    <field name="disc_after_iva" />
+                    <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                        <label for="amount_total" />
+                        <button name="button_dummy" invisible="state != 'draft'" string="(update)" type="object" class="oe_edit_only oe_link" />
+                    </div>
+                    <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}" />
+                </xpath>
+                <xpath expr="//field[@name='tax_totals']" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

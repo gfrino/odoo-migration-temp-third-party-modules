@@ -1,0 +1,5 @@
+id,name,model_id,group_id/id,operation,domain
+validita_offerta,validita.offerta,validita.offerta,base.group_user,crud,
+sale_fornitura,sale.fornitura,sale.fornitura,base.group_user,crud,
+access_contact_title_public,Contact titles,res.partner.title,base.group_everyone,r,
+access_contact_title_admin,Contact titles administration,res.partner.title,base.group_system,crud,

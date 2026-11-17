@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Punto di partenza: nomi, parole chiave e colori si cambiano in Configurazione → Famiglie di prodotti. -->
+    <record id="family_poke" model="tw.littleinka.kpi.family">
+        <field name="name">Poké</field>
+        <field name="sequence">1</field>
+        <field name="color">10</field>
+        <field name="keywords">poke, bowl</field>
+    </record>
+    <record id="family_sushi" model="tw.littleinka.kpi.family">
+        <field name="name">Sushi</field>
+        <field name="sequence">2</field>
+        <field name="color">1</field>
+        <field name="keywords">sushi, uramaki, nigiri, sashimi, hosomaki, maki, temaki, gunkan, roll, tartare, onigiri</field>
+    </record>
+    <record id="family_drinks" model="tw.littleinka.kpi.family">
+        <field name="name">Bevande</field>
+        <field name="sequence">3</field>
+        <field name="color">4</field>
+        <field name="keywords">bevand, bibit, drink, birr, vino, acqua, soft, ice tea, succo</field>
+    </record>
+    <record id="family_dessert" model="tw.littleinka.kpi.family">
+        <field name="name">Dessert</field>
+        <field name="sequence">4</field>
+        <field name="color">9</field>
+        <field name="keywords">dessert, dolc, mochi, gelat</field>
+    </record>
+</odoo>

@@ -1,0 +1,1 @@
+{'name': 'Fatture light', 'summary': 'Fatture standard e fatturazione delle Offerte light', 'version': '20.0.1.0.2', 'author': 'ticinoWEB', 'license': 'LGPL-3', 'depends': ['tw_sale_offer_light'], 'data': ['views/account_move.xml'], 'installable': True, 'application': False}

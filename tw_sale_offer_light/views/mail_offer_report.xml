@@ -1,0 +1,21 @@
+<odoo>
+    <template id="report_email_offer">
+        <t t-if="docs and docs[0].is_light_offer">
+            <t t-call="sale.report_saleorder"/>
+        </t>
+        <t t-else="">
+            <t t-call="tw_extend.report_so_solare"/>
+        </t>
+    </template>
+    <record id="action_report_email_offer" model="ir.actions.report">
+        <field name="name">Offerta PDF</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">tw_sale_offer_light.report_email_offer</field>
+        <field name="print_report_name">('Offerta Light - ' if object.is_light_offer else 'Offerta Solare - ') + object.name.replace('/', '-')</field>
+    </record>
+    <function model="mail.template" name="write">
+        <value eval="[ref('sale.email_template_edi_sale'), ref('sale.mail_template_sale_confirmation')]"/>
+        <value eval="{'report_template_ids': [(6, 0, [ref('action_report_email_offer')])]}"/>
+    </function>
+</odoo>

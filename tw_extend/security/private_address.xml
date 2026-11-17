@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="pons_private_address_restriction" model="ir.access">
+        <field name="name">Private contact access inherited from the original system</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="group_id" eval="False"/>
+        <field name="operation">crud</field>
+        <field name="domain">[] if (not user.has_group('base.group_user') or user.pons_private_address_access) else [('type', '!=', 'private')]</field>
+    </record>
+</odoo>

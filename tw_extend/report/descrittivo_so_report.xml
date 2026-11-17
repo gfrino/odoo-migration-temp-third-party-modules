@@ -1,0 +1,141 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+
+	<template id="report_so_descrittivo_doc">
+		<t t-set="o" t-value="doc" />
+			<t t-set="address">
+					<t t-if="doc.partner_id.title">
+						<t t-out="doc.partner_id.title.name" />
+					</t>
+					<t t-out="doc.partner_id.name" /><br />
+					<span t-if="doc.partner_id.street">
+						<span t-out="doc.partner_id.street" /><br />
+					</span>
+					<span t-if="doc.partner_id.street2">
+						<t t-out="doc.partner_id.street2" /><br />
+					</span>
+					<span t-if="doc.partner_id.zip">
+						<t t-out="doc.partner_id.zip" />
+					</span>
+					<span t-if="doc.partner_id.city">
+						<t t-out="doc.partner_id.city" />
+					</span><br />
+					<span t-if="doc.partner_id.country_id">
+						<t t-out="doc.partner_id.country_id.name" /><br />
+					</span>
+					<div t-field="doc.partner_id.vat" />
+				</t>
+
+
+
+
+
+				<t t-call="web.external_layout" o="o" address="address">
+			<div class="page">
+				<div class="col-auto col-4 mw-100 mb-2">
+					Maggia, <span t-field="o.date_order" />
+				</div>
+				<div t-if="o.client_order_ref">
+					<span style="color:blue;">Offerta per <span t-field="o.client_order_ref" /></span>
+				</div>
+				<div><b>Offerta nr: </b><span t-field="o.name" /></div>
+				<br />
+				<b>Posizione</b>
+				<table class="table table-sm table-borderless" width="100%">
+					<tr>
+						<td width="25%">CH1903 / LV03</td>
+						<td width="40%"><span t-field="o.CH1903_LV03" /> </td>
+						<td width="35%" />
+					</tr>
+					<tr>
+						<td width="25%">WGS 84 (long/lat)</td>
+						<td width="40%"><span t-field="o.wgs_84" /></td>
+						<td width="35%" />
+					</tr>
+					<tr>
+						<td width="25%">Altitudine</td>
+						<td width="40%"><span t-field="o.altitudine" /></td>
+						<td width="35%" />
+					</tr>
+					<tr>
+						<td width="25%">Mappale</td>
+						<td width="40%"><span t-field="o.mappale" /></td>
+						<td width="35%" />
+					</tr>
+				</table>
+				<table class="table table-sm table-borderless" width="100%">
+					<tr style="background-color: transparent;">
+						<td width="50%" align="left"><t t-if="o.img1"><img t-att-src="image_data_uri(o.img1)" style="max-height: 6cm; max-width: 12cm; text-align:center;" /></t></td>
+						<td width="50%" align="left"><t t-if="o.img2"><img t-att-src="image_data_uri(o.img2)" style="max-height: 6cm; max-width: 12cm; text-align:center;" /></t></td>
+					</tr>
+				</table>
+				<b>Orientamento del generatore</b>
+				<table class="table table-sm table-borderless" width="100%">
+					<tr>
+						<td width="25%">Azimuth</td>
+						<td width="40%"><span t-field="o.azimuth" /> </td>
+						<td width="35%" />
+					</tr>
+					<tr>
+						<td width="25%">Pendenza tetto</td>
+						<td width="40%"><span t-field="o.pendenza_tetto" /></td>
+						<td width="35%" />
+					</tr>
+				</table>
+				<b>Dati tecnici dell'impianto</b>
+				<table class="table table-sm table-borderless" width="100%">
+					<tr>
+						<td width="25%">Potenza totale</td>
+						<td width="40%"><span t-field="o.potenza_totale" /> </td>
+						<td width="35%" />
+					</tr>
+					<tr>
+						<td width="25%">Superficie dei moduli</td>
+						<td width="40%"><span t-field="o.superficie_dei_moduli" /></td>
+						<td width="35%" />
+					</tr>
+					<tr>
+						<td width="25%">Produzione annua stimata</td>
+						<td width="40%"><span t-field="o.produzione_annua_stimata" /> </td>
+						<td width="35%" />
+					</tr>
+					<tr>
+						<td width="25%">Tipo di installazione</td>
+						<td width="40%"><span t-field="o.tipo_di_installazione" /></td>
+						<td width="35%" />
+					</tr>
+				</table>
+				<t t-if="o.img3">
+					<div style="page-break-before: always;">
+						<span style="color:blue;"><b>Disposizione prevista</b></span>
+						<table width="100%" class="table table-sm table-borderless">
+							<tr width="100%" style="background-color: transparent;">
+								<td width="100%" align="center" style="background-color: transparent;"><img t-att-src="image_data_uri(o.img3)" style="background-color: transparent; height: 900px; width: 750px;" /></td>
+							</tr>
+						</table>
+					</div>
+				</t>
+			</div>
+		</t>
+    </template>
+
+	<template id="report_so_descrittivo">
+		<t t-call="web.html_container">
+			<t t-foreach="docs" t-as="doc">
+				<t t-call="tw_extend.report_so_descrittivo_doc" t-lang="doc.partner_id.lang" />
+			</t>
+		</t>
+	</template>
+
+	<record id="descrittivo_so_report" model="ir.actions.report">
+		<field name="name">Descrittivo</field>
+		<field name="model">sale.order</field>
+		<field name="report_type">qweb-pdf</field>
+		<field name="report_name">tw_extend.report_so_descrittivo</field>
+
+		<field name="print_report_name">(object.name+'_'+object.client_order_ref)</field>
+		<field name="binding_model_id" ref="sale.model_sale_order" />
+		<field name="binding_type">report</field>
+	</record>
+
+</odoo>

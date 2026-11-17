@@ -1,0 +1,19 @@
+id,name,model_id,group_id/id,operation,domain
+access_kpi_sede_user,KPI sede user,tw.littleinka.kpi.sede,group_kpi_user,r,
+access_kpi_sede_manager,KPI sede manager,tw.littleinka.kpi.sede,group_kpi_manager,crud,
+access_kpi_family_user,KPI family user,tw.littleinka.kpi.family,group_kpi_user,r,
+access_kpi_family_manager,KPI family manager,tw.littleinka.kpi.family,group_kpi_manager,crud,
+access_kpi_category_user,KPI category user,tw.littleinka.kpi.category,group_kpi_user,r,
+access_kpi_category_manager,KPI category manager,tw.littleinka.kpi.category,group_kpi_manager,crud,
+access_kpi_order_user,KPI order user,tw.littleinka.kpi.order,group_kpi_user,r,
+access_kpi_order_manager,KPI order manager,tw.littleinka.kpi.order,group_kpi_manager,rd,
+access_kpi_order_line_user,KPI order line user,tw.littleinka.kpi.order.line,group_kpi_user,r,
+access_kpi_order_line_manager,KPI order line manager,tw.littleinka.kpi.order.line,group_kpi_manager,rd,
+access_kpi_report_user,KPI report user,tw.littleinka.kpi.report,group_kpi_user,r,
+access_kpi_report_line_user,KPI report line user,tw.littleinka.kpi.report.line,group_kpi_user,r,
+access_kpi_key_wizard_manager,KPI key wizard manager,tw.littleinka.kpi.key.wizard,group_kpi_manager,crud,
+rule_kpi_sede_company,KPI sede company,tw.littleinka.kpi.sede,,crud,"[('company_id', 'in', company_ids)]"
+rule_kpi_order_company,KPI order company,tw.littleinka.kpi.order,,crud,"[('company_id', 'in', company_ids)]"
+rule_kpi_order_line_company,KPI order line company,tw.littleinka.kpi.order.line,,crud,"[('company_id', 'in', company_ids)]"
+rule_kpi_report_company,KPI report company,tw.littleinka.kpi.report,,r,"['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]"
+rule_kpi_report_line_company,KPI report line company,tw.littleinka.kpi.report.line,,r,"['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]"

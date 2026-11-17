@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_kpi_dashboard" model="ir.actions.client">
+        <field name="name">Little Inka KPI</field>
+        <field name="tag">tw_littleinka_kpi.dashboard</field>
+        <field name="path">littleinka-kpi</field>
+    </record>
+
+    <menuitem id="menu_kpi_root" name="Little Inka KPI" sequence="45"
+              web_icon="tw_littleinka_kpi,static/description/icon.png"
+              groups="tw_littleinka_kpi.group_kpi_user"/>
+
+    <menuitem id="menu_kpi_dashboard" name="Dashboard" parent="menu_kpi_root" sequence="1" action="action_kpi_dashboard"/>
+
+    <menuitem id="menu_kpi_analysis" name="Analisi" parent="menu_kpi_root" sequence="10"/>
+    <menuitem id="menu_kpi_report" name="Vendite" parent="menu_kpi_analysis" sequence="1" action="action_kpi_report"/>
+    <menuitem id="menu_kpi_report_line" name="Prodotti venduti" parent="menu_kpi_analysis" sequence="2" action="action_kpi_report_line"/>
+    <menuitem id="menu_kpi_order" name="Ordini online" parent="menu_kpi_analysis" sequence="3" action="action_kpi_order"/>
+
+    <menuitem id="menu_kpi_config" name="Configurazione" parent="menu_kpi_root" sequence="90"
+              groups="tw_littleinka_kpi.group_kpi_manager"/>
+    <menuitem id="menu_kpi_sede" name="Sedi" parent="menu_kpi_config" sequence="1" action="action_kpi_sede"/>
+    <menuitem id="menu_kpi_family" name="Famiglie di prodotti" parent="menu_kpi_config" sequence="2" action="action_kpi_family"/>
+    <menuitem id="menu_kpi_category" name="Categorie" parent="menu_kpi_config" sequence="3" action="action_kpi_category"/>
+</odoo>

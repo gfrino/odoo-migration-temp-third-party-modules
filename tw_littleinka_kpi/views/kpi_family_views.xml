@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_kpi_family_list" model="ir.ui.view">
+        <field name="name">tw.littleinka.kpi.family.list</field>
+        <field name="model">tw.littleinka.kpi.family</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="keywords" placeholder="es. poke, poké, bowl"/>
+                <field name="color" widget="color_picker"/>
+                <field name="category_count"/>
+                <field name="active" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_kpi_family" model="ir.actions.act_window">
+        <field name="name">Famiglie di prodotti</field>
+        <field name="res_model">tw.littleinka.kpi.family</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Crea le famiglie che vuoi contare nella dashboard</p>
+            <p>Per esempio Poké, Sushi, Bevande, Dessert. Le parole chiave assegnano da sole le categorie nuove.</p>
+        </field>
+    </record>
+
+    <record id="view_kpi_category_list" model="ir.ui.view">
+        <field name="name">tw.littleinka.kpi.category.list</field>
+        <field name="model">tw.littleinka.kpi.category</field>
+        <field name="arch" type="xml">
+            <list editable="bottom" create="false" decoration-warning="not family_id">
+                <header>
+                    <button name="action_apply_keywords" type="object" string="Assegna con le parole chiave"/>
+                </header>
+                <field name="name" readonly="True"/>
+                <field name="family_id" options="{'no_create': True}"/>
+                <field name="source"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_kpi_category_search" model="ir.ui.view">
+        <field name="name">tw.littleinka.kpi.category.search</field>
+        <field name="model">tw.littleinka.kpi.category</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="family_id"/>
+                <filter name="to_assign" string="Da assegnare" domain="[('family_id', '=', False)]"/>
+                <separator/>
+                <filter name="online" string="Sito e app" domain="[('source', 'in', ('online', 'both'))]"/>
+                <filter name="pos" string="Cassa" domain="[('source', 'in', ('pos', 'both'))]"/>
+                <group>
+                    <filter name="by_family" string="Famiglia" context="{'group_by': 'family_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_kpi_category" model="ir.actions.act_window">
+        <field name="name">Categorie</field>
+        <field name="res_model">tw.littleinka.kpi.category</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_to_assign': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nessuna categoria da assegnare</p>
+            <p>Le categorie del sito e della cassa compaiono qui da sole: scegli per ognuna la famiglia in cui contarla.</p>
+        </field>
+    </record>
+</odoo>

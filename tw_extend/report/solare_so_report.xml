@@ -1,0 +1,514 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+
+	<template id="report_so_solare_doc">
+		<t t-set="o" t-value="doc" />
+			<t t-call="web.external_layout" o="o">
+			<div class="page">
+				<table class="table table-sm table-borderless" style="background-color: white;font-size:16px;" width="100%">
+					<tr>
+						<td width="60%">
+							<div class="col-auto col-4 mw-100 mb-2">
+								<span style="font-size:18px;"> Maggia, <span t-field="o.date_order" t-options="{&quot;format&quot;: &quot;dd/MM/yyyy&quot;}" /></span>
+							</div>
+							<br />
+							<span style="font-size:18px;"><b>Offerta nr: </b><span style="font-size:16px;" t-field="o.name" /></span>
+						</td>
+						<td width="40%">
+							<span t-if="doc.partner_id.title">
+								<span style="font-size:18px;" t-out="doc.partner_id.title.name" /><br />
+							</span>
+							<span t-if="doc.partner_id.name">
+								<span style="font-size:18px;" t-out="doc.partner_id.name" /><br />
+							</span>
+							<span t-if="doc.partner_id.street">
+								<span style="font-size:18px;" t-out="doc.partner_id.street" /><br />
+							</span>
+							<span t-if="doc.partner_id.street2">
+								<span style="font-size:18px;" t-out="doc.partner_id.street2" /><br />
+							</span>
+							<span t-if="doc.partner_id.zip">
+								<span style="font-size:18px;" t-out="doc.partner_id.zip" />
+							</span>
+							<span t-if="doc.partner_id.city">
+								<span style="font-size:18px;" t-out="doc.partner_id.city" />
+							</span><br />
+							<span t-if="doc.partner_id.country_id">
+								<span style="font-size:18px;" t-out="doc.partner_id.country_id.name" /><br />
+							</span>
+							<div style="font-size:18px;" t-field="doc.partner_id.vat" />
+						</td>
+					</tr>
+				</table>
+
+
+
+
+
+
+
+				<t t-if="o.client_order_ref">
+					<b><span style="color:blue;font-size:24px;">Offerta per <span t-field="o.client_order_ref" /></span></b>
+				</t>
+
+				<br /><br />
+				<span style="font-size:18px;"><b>Posizione</b></span>
+				<br /><br />
+				<table class="table table-sm table-borderless" style="background-color: white;font-size:16px;" width="100%">
+					<tr style="font-size:16px;">
+						<td style="font-size:18px;" width="25%">Ubicazione impianto</td>
+						<td style="font-size:18px;" width="40%"><span t-field="o.ubicazione_impianto" /> </td>
+						<td style="font-size:18px;" width="35%" />
+					</tr>
+					<tr style="font-size:16px;">
+						<td style="font-size:18px;" width="25%">CH1903 / LV03</td>
+						<td style="font-size:18px;" width="40%"><span t-field="o.CH1903_LV03" /> </td>
+						<td style="font-size:18px;" width="35%" />
+					</tr>
+					<tr style="font-size:16px;">
+						<td style="font-size:18px;" width="25%">WGS 84 (long/lat)</td>
+						<td style="font-size:18px;" width="40%"><span t-field="o.wgs_84" /></td>
+						<td style="font-size:18px;" width="35%" />
+					</tr>
+					<tr>
+						<td style="font-size:18px;" width="25%">Altitudine</td>
+						<td style="font-size:18px;" width="40%"><span t-field="o.altitudine" /> <span> m.s.l.m.</span></td>
+						<td style="font-size:18px;" width="35%" />
+					</tr>
+					<tr>
+						<td style="font-size:18px;" width="25%">Mappale</td>
+						<td style="font-size:18px;" width="40%"><span t-field="o.mappale" /></td>
+						<td style="font-size:18px;" width="35%" />
+					</tr>
+				</table>
+				<table class="table table-sm table-borderless" width="100%">
+					<tr style="background-color: transparent;">
+						<td width="50%" align="left"><t t-if="o.img1"><img t-att-src="image_data_uri(o.img1)" style="max-height: 10cm; max-width: 13cm; text-align:center;" /></t></td>
+						<td width="50%" align="left"><t t-if="o.img2"><img t-att-src="image_data_uri(o.img2)" style="max-height: 10cm; max-width: 13cm; text-align:center;" /></t></td>
+					</tr>
+				</table>
+				<span style="font-size:18px;"><b>Orientamento del generatore</b></span><br /><br />
+				<table class="table table-sm table-borderless" width="100%">
+					<tr>
+						<td style="font-size:18px;" width="25%">Azimuth</td>
+						<td style="font-size:18px;" width="40%"><span t-field="o.azimuth" /> </td>
+						<td style="font-size:18px;" width="35%" />
+					</tr>
+					<tr>
+						<td style="font-size:18px;" width="25%">Pendenza tetto</td>
+						<td style="font-size:18px;" width="40%"><span t-field="o.pendenza_tetto" /></td>
+						<td style="font-size:18px;" width="35%" />
+					</tr>
+				</table>
+				<span style="font-size:18px;"><b>Dati tecnici dell'impianto</b></span><br /><br />
+				<table class="table table-sm table-borderless" width="100%">
+					<tr>
+						<td style="font-size:18px;" width="25%">Potenza totale</td>
+						<td style="font-size:18px;" width="40%"><span t-field="o.potenza_totale" /> </td>
+						<td style="font-size:18px;" width="35%" />
+					</tr>
+					<tr>
+						<td style="font-size:18px;" width="25%">Superficie dei moduli</td>
+						<td style="font-size:18px;" width="40%"><span t-field="o.superficie_dei_moduli" /></td>
+						<td style="font-size:18px;" width="35%" />
+					</tr>
+					<tr>
+						<td style="font-size:18px;" width="25%">Produzione annua stimata</td>
+						<td style="font-size:18px;" width="40%"><span t-field="o.produzione_annua_stimata" /> <span>kWh</span></td>
+						<td style="font-size:18px;" width="35%" />
+					</tr>
+					<tr>
+						<td style="font-size:18px;" width="25%">Tipo di installazione</td>
+						<td style="font-size:18px;" width="40%"><span t-field="o.tipo_di_installazione" /></td>
+						<td style="font-size:18px;" width="35%" />
+					</tr>
+				</table>
+				<t t-if="o.img3">
+					<div style="page-break-before: always;">
+						<span style="color:blue;font-size:18px;"><b>Disposizione prevista</b></span><br /><br />
+						<table width="100%" class="table table-sm table-borderless">
+							<tr width="100%" style="background-color: transparent;">
+								<td width="100%" align="center" style="background-color: transparent;"><img t-att-src="image_data_uri(o.img3)" style="background-color: transparent; height: 1050px; width: 850px;" /></td>
+							</tr>
+						</table>
+					</div>
+				</t>
+
+				<div style="page-break-before: always;">
+					<span style="color:blue;font-size:18px;"><b>Costo materiale e prestazioni</b></span>
+					<table class="table table-bordered mt32" width="100%">
+						<thead style="background-color:#f9b001;">
+							<th width="50%" style="text-align:left;">Articolo / Prestazione</th>
+							<th width="10%" style="text-align:right;">Qta.</th>
+							<th width="10%" style="text-align:right;">UdM</th>
+							<th t-if="not o.hide_prices" width="15%" style="text-align:right;">Costo unit.</th>
+							<th width="15%" style="text-align:right;">Totale</th>
+						</thead>
+						<tbody>
+							<t t-set="product_category" t-value="[]" />
+							<t t-foreach="o.order_line.filtered(lambda line: not line._pons_is_unselected_optional())" t-as="l">
+								<t t-if="l.product_id.categ_id not in product_category">
+									<t t-set="product_category" t-value="product_category+[l.product_id.categ_id]" />
+								</t>
+							</t>
+							<t t-foreach="product_category" t-as="category">
+                                <t t-set="category_lines" t-value="o.order_line.filtered(lambda line: not line.display_type and not line._pons_is_unselected_optional() and line.product_id.categ_id == category)" />
+								<tr>
+									<td width="50%"><b><span t-field="category.name" /></b></td>
+									<td width="10%" />
+									<td width="10%" />
+									<td t-if="not o.hide_prices" width="15%" />
+                                    <td width="15%" align="right"><b t-if="o.hide_prices"><span t-out="sum(category_lines.mapped('price_subtotal'))" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" /></b></td>
+								</tr>
+								<t t-foreach="o.order_line.filtered(lambda line: not line._pons_is_unselected_optional())" t-as="l">
+									<tr t-if="category.id==l.product_id.categ_id.id and l.display_type not in ['line_section', 'line_note']" style="font-size:14px;">
+										<td width="50%" style="text-align:left;margin:3px;"><span t-field="l.product_id.name" /></td>
+										<td width="10%" align="right"><span t-field="l.product_uom_qty" /></td>
+										<td width="10%" align="right"><span t-out="l.product_uom_id.name" /></td>
+										<td t-if="not o.hide_prices" width="15%" align="right"><span t-field="l.price_unit" /></td>
+										<td width="15%" align="right"><span t-if="not o.hide_prices" t-field="l.price_subtotal" /></td>
+									</tr>
+								</t>
+							</t>
+							<tr>
+								<td width="60%" style="text-align:left;margin:3px;"><b>Costo totale (IVA escl.)</b></td>
+								<td width="10%" align="right" />
+								<td width="10%" align="right" />
+								<td t-if="not o.hide_prices" width="15%" align="right" />
+								<td width="15%" align="right"><span t-field="o.amount_untaxed" /></td>
+							</tr>
+							<t t-if="o.sconto_amount">
+								<tr style="font-size:14px;">
+									<td width="60%" style="text-align:left;margin:3px;">Ribasso</td>
+									<t t-if="o.sconto_dis_type == 'percent'">
+										<td width="10%" align="right"><span t-field="o.sconto_tax" />%</td>
+									</t>
+									<t t-if="o.sconto_dis_type == 'fixed'">
+										<td width="10%" align="right"><span t-field="o.sconto_tax" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+									</t>
+									<td width="10%" align="right" />
+									<td t-if="not o.hide_prices" width="15%" align="right" />
+									<td width="15%" align="right"><span t-field="o.sconto_amount" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+								</tr>
+								<tr>
+									<td width="60%" style="text-align:left;margin:3px;">Totale</td>
+									<td width="10%" align="right" />
+									<td width="10%" align="right" />
+									<td t-if="not o.hide_prices" width="15%" align="right" />
+									<td width="15%" align="right"><span t-field="o.after_sconto_amt" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+								</tr>
+							</t>
+							<t t-if="o.tw_disc_amt">
+								<tr style="font-size:14px;">
+									<td width="60%" style="text-align:left;margin:3px;">Sconto</td>
+									<t t-if="o.tw_dis_type == 'percent'">
+										<td width="10%" align="right"><span t-field="o.tw_disc" />%</td>
+									</t>
+									<t t-if="o.tw_dis_type == 'fixed'">
+										<td width="10%" align="right"><span t-field="o.tw_disc" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+									</t>
+									<td width="10%" align="right" />
+									<td t-if="not o.hide_prices" width="15%" align="right" />
+									<td width="15%" align="right"><span t-field="o.tw_disc_amt" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+								</tr>
+								<tr>
+									<td width="60%" style="text-align:left;margin:3px;">Totale</td>
+									<td width="10%" align="right" />
+									<td width="10%" align="right" />
+									<td t-if="not o.hide_prices" width="15%" align="right" />
+									<td width="15%" align="right"><span t-field="o.after_tw_amt" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+								</tr>
+							</t>
+							<tr style="font-size:14px;">
+								<td width="60%" style="text-align:left;margin:3px;">IVA</td>
+								<td width="10%" align="right"><t t-if="o.so_taxes_id"><span t-field="o.so_taxes_id[0].name" /></t></td>
+								<td width="10%" align="right" />
+								<td t-if="not o.hide_prices" width="15%" align="right" />
+								<td width="15%" align="right"><span t-field="o.so_tax_after_discount" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+							</tr>
+							<tr>
+								<td width="60%" style="text-align:left;margin:3px;"><b>Totale</b></td>
+								<td width="10%" align="right" />
+								<td width="10%" align="right" />
+								<td t-if="not o.hide_prices" width="15%" align="right" />
+								<td width="15%" align="right"><span t-field="o.amount_total" /></td>
+							</tr>
+						</tbody>
+					</table>
+
+					<t t-if="o.order_line.filtered(lambda line: line._pons_is_unselected_optional() and not line.display_type)">
+						<table class="table table-bordered mt32" width="100%" style="page-break-before:always;">
+							<tbody>
+								<tr>
+									<td width="50%"><b>Prestazioni non comprese nell'offerta</b></td>
+									<td width="10%" />
+									<td width="10%" />
+									<td width="15%" />
+									<td width="15%" />
+								</tr>
+								<t t-foreach="o.order_line.filtered(lambda line: line._pons_is_unselected_optional() and not line.display_type)" t-as="l">
+									<tr style="font-size:14px;">
+										<td width="50%" style="text-align:left;margin:3px;"><span t-field="l.name" /></td>
+										<td width="10%" align="right"><span t-field="l.pons_optional_quantity" /></td>
+										<td width="10%" align="right"><span t-out="l.product_uom_id.name" /></td>
+										<td width="15%" align="right"><t t-if="l.price_unit and not o.hide_prices"> <span t-field="l.price_unit" /></t></td>
+										<td width="15%" align="right"><t t-if="l.price_unit and not o.hide_prices"><span t-out="l.price_unit * l.pons_optional_quantity" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></t></td>
+									</tr>
+								</t>
+							</tbody>
+						</table>
+					</t>
+					<div style="page-break-before: always;">
+						<span style="color:blue;font-size:18px;"><b>Origine e garanzie del fabbricante</b></span>
+						<table class="table table-bordered mt32" width="100%">
+							<t t-set="product_category" t-value="[]" />
+							<t t-foreach="o.order_line.filtered(lambda line: not line._pons_is_unselected_optional())" t-as="l">
+								<t t-if="l.product_id.categ_id not in product_category">
+									<t t-set="product_category" t-value="product_category+[l.product_id.categ_id]" />
+								</t>
+							</t>
+							<t t-foreach="product_category" t-as="category">
+								<t t-set="categ_name" t-value="" />
+								<t t-set="origin" t-value="" />
+								<t t-set="g_f" t-value="" />
+								<t t-set="g_p" t-value="" />
+								<t t-set="cap" t-value="" />
+								<t t-set="kva" t-value="" />
+								<t t-foreach="o.get_category_data(category)" t-as="cat">
+									<t t-if="cat.get('categ_name')">
+										<t t-set="categ_name" t-value="cat.get('categ_name')" />
+									</t>
+									<t t-if="cat.get('origin')">
+										<t t-set="origin" t-value="cat.get('origin')" />
+									</t>
+									<t t-if="cat.get('g_f')">
+										<t t-set="g_f" t-value="cat.get('g_f')" />
+									</t>
+									<t t-if="cat.get('g_p')">
+										<t t-set="g_p" t-value="cat.get('g_p')" />
+									</t>
+									<t t-if="cat.get('cap')">
+										<t t-set="cap" t-value="cat.get('cap')" />
+									</t>
+									<t t-if="cat.get('kva')">
+										<t t-set="kva" t-value="cat.get('kva')" />
+									</t>
+								</t>
+								<t t-if="categ_name">
+									<tr style="background-color:#f9b001;">
+										<td width="49%"><b><span t-out="categ_name" /></b></td>
+										<td width="15%"><b>Origine</b></td>
+										<t t-if="cap">
+											<td width="18%"><b><span t-out="cap" /></b></td>
+										</t>
+										<td width="18%"><b><span t-out="g_f" /></b></td>
+										<t t-if="g_p">
+											<td width="18%"><b><span t-out="g_p" /></b></td>
+										</t>
+
+										<t t-if="kva">
+											<td width="18%"><b><span t-out="kva" /></b></td>
+										</t>
+
+									</tr>
+									<t t-foreach="o.get_category_detail_data(category)" t-as="prod">
+										<tr style="font-size:14px;">
+											<td width="49%"><span t-out="prod.get('prod_name') or ''" /></td>
+											<td width="15%"><span t-out="prod.get('origin') or ''" /></td>
+											<t t-if="prod.get('cap')">
+												<td width="18%"><span t-out="prod.get('cap') or ''" /></td>
+											</t>
+											<td width="18%"><span t-out="prod.get('g_f') or ''" /></td>
+											<t t-if="prod.get('g_p')">
+												<td width="18%"><span t-out="prod.get('g_p') or ''" /></td>
+											</t>
+
+											<t t-if="prod.get('kva')">
+												<td width="18%"><span t-out="prod.get('kva') or ''" /></td>
+											</t>
+										</tr>
+									</t>
+								</t>
+							</t>
+
+
+						</table>
+
+					</div>
+					<div style="page-break-before: always;">
+						<div style="color:blue;font-size:18px;"><b>Calcolo incentivi (federali, cantonali e comunali)</b></div>
+						<br />
+						<table class="table table-sm table-borderless" width="100%">
+							<tr>
+								<td width="25%">Potenza totale</td>
+								<td width="40%"><span t-field="o.potenza_totale" /> </td>
+								<td width="35%" />
+							</tr>
+							<tr>
+								<td width="25%">Superficie dei moduli</td>
+								<td width="40%"><span t-field="o.superficie_dei_moduli" /></td>
+								<td width="35%" />
+							</tr>
+							<tr>
+								<td width="25%">Produzione annua stimata</td>
+								<td width="40%"><span t-field="o.produzione_annua_stimata" /> <span>kWh</span></td>
+								<td width="35%" />
+							</tr>
+							<tr>
+								<td width="25%">Tipo di installazione</td>
+								<td width="40%"><span t-field="o.tipo_di_installazione" /></td>
+								<td width="35%" />
+							</tr>
+							<tr>
+								<td width="25%">Autoconsumo</td>
+								<td width="40%"><span t-field="o.autoconsumo" /></td>
+								<td width="35%" />
+							</tr>
+							<tr>
+								<td width="25%">Facciata</td>
+								<td width="40%"><span t-field="o.facciata" /></td>
+								<td width="35%" />
+							</tr>
+						</table>
+						<span>Rimunerazione unica per impianti fotovoltaici (stato al <span t-field="o.date_order" />)</span>
+						<br />
+						<table class="table table-sm table-borderless" width="100%">
+							<t t-set="first_tot" t-value="0.0" />
+							<tr t-if="o.contributo_base and not o.pronovo_manual">
+								<td width="75%">Contributo base</td>
+								<td width="25%" style="text-align:right;"><span t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" t-out="o.contributo_base" /> </td>
+							</tr>
+							<tr t-if="o.get_cont_pot_less_30() and not o.pronovo_manual">
+								<td width="75%">Contributo potenza &lt;= 30 kW</td>
+								<td width="25%" style="text-align:right;"><span t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" t-out="o.get_cont_pot_less_30()" /> </td>
+							</tr>
+							<tr style="border-bottom: 1px solid black;" t-if="o.get_cont_pot_gre_30() and not o.pronovo_manual">
+								<td width="75%">Contributo potenza &gt; 30 kW</td>
+								<td width="25%" style="text-align:right;"><span t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" t-out="o.get_cont_pot_gre_30()" /> </td>
+							</tr>
+							<tr style="border-top: 1px solid black;border-bottom: 1px solid black;">
+								<td width="75%"><b>Totale Pronovo (Federale)</b></td>
+								<td width="25%" style="text-align:right;"><b><span t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" t-out="o.pronovo_federale if o.pronovo_manual else (o.get_cont_pot_gre_30() + o.get_cont_pot_less_30() + o.contributo_base)" /></b></td>
+								<t t-set="first_tot" t-value="o.pronovo_federale if o.pronovo_manual else (o.get_cont_pot_gre_30() + o.get_cont_pot_less_30() + o.contributo_base)" />
+							</tr>
+						</table>
+						<br />
+						<t t-set="tot_ince" t-value="0.0" />
+						<table class="table table-sm table-borderless" width="100%">
+							<t t-set="sec_tot" t-value="0.0" />
+							<tr t-if="o.contributo_base and not o.fer_manual">
+								<td width="75%">Contributo base - 50.00% del contributo base federale</td>
+								<td width="25%" style="text-align:right;"><span t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" t-out="o.contributo_base / 2" /> </td>
+							</tr>
+							<tr t-if="o.get_cont_pot_less_30() and not o.fer_manual">
+								<td width="75%">Contributo potenza &lt;= 30 kW - 50.00% del contributo federale</td>
+								<td width="25%" style="text-align:right;"><span t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" t-out="o.get_cont_pot_less_30() / 2" /> </td>
+							</tr>
+							<tr style="border-bottom: 1px solid black;" t-if="o.get_cont_pot_gre_30() and not o.fer_manual">
+								<td width="75%">Contributo potenza &gt; 30 kW - 33.33% del contributo federale</td>
+								<td width="25%" style="text-align:right;"><span t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" t-out="o.get_cont_pot_gre_30() / 3" /> </td>
+							</tr>
+							<tr style="border-top: 1px solid black;border-bottom: 1px solid black;">
+								<td width="75%"><b>Totale Rimunerazione FER (Cantonale)</b></td>
+								<td width="25%" style="text-align:right;"><b><span t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" t-out="o.rimunerazione_federale if o.fer_manual else ((o.get_cont_pot_gre_30() / 3) + (o.get_cont_pot_less_30() / 2) + (o.contributo_base / 2))" /></b></td>
+								<t t-set="sec_tot" t-value="o.rimunerazione_federale if o.fer_manual else ((o.get_cont_pot_gre_30() / 3) + (o.get_cont_pot_less_30() / 2) + (o.contributo_base / 2))" />
+							</tr>
+						</table>
+						<br />
+						<table style="border-top: 1px solid black;border-bottom: 1px solid black;" class="table table-sm table-borderless" width="100%">
+							<tr>
+								<td width="75%"><b>Contributo comunale</b></td>
+								<td width="25%" style="text-align:right;"><b><span t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" t-out="o.contributo_comunale" /></b></td>
+							</tr>
+						</table>
+						<br />
+						<table style="border-top: 1px solid black;border-bottom: 1px solid black;" class="table table-sm table-borderless" width="100%">
+							<tr>
+								<td width="75%"><b>Totale incentivi</b></td>
+								<td width="25%" style="text-align:right;"><b><span t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" t-out="o.contributo_comunale + first_tot + sec_tot" /></b></td>
+								<t t-set="tot_ince" t-value="o.contributo_comunale + first_tot + sec_tot" />
+							</tr>
+						</table>
+						<br />
+						<table class="table table-sm table-borderless" width="100%">
+							<tr>
+								<td width="75%"><b>Costo impianto al netto degli incentivi</b></td>
+								<td width="25%" style="text-align:right;"><b><span t-options="{'widget': 'monetary', 'display_currency': o.currency_id}" t-out="o.amount_total - tot_ince" /></b></td>
+							</tr>
+						</table>
+						<br />
+						<table class="table table-sm table-borderless" width="100%">
+							<tr>
+								<td width="32%" style="text-align:left;"><b><u>Condizioni di pagamento:</u></b></td>
+								<td width="2%" style="text-align:left;" />
+								<td width="32%" style="text-align:left;"><b><u>Validità offerta:</u></b></td>
+								<td width="2%" style="text-align:left;" />
+								<td width="32%" style="text-align:left;"><b><u>Fornitura:</u></b></td>
+							</tr>
+							<tr>
+								<td width="32%" style="text-align:left;"><span t-out="o.payment_term_id.name or '' " /></td>
+								<td width="2%" style="text-align:left;" />
+								<td width="32%" style="text-align:left;"><span t-out="o.validita_offerta_id.name or '' " /></td>
+								<td width="2%" style="text-align:left;" />
+								<td width="32%" style="text-align:left;"><span t-out="o.fornitura_id.name or '' " /></td>
+							</tr>
+						</table>
+						<div t-if="not is_html_empty(o.note)" name="offer_terms" style="margin: 16px 0; overflow-wrap: break-word;">
+                            <div t-field="o.note"/>
+                        </div>
+                        <div name="offer_acceptance" style="page-break-inside: avoid;">
+                        <span><b>Accettazione formale - Offerta / <span t-out="o.name" /> </b></span>
+						<br /><br />
+						<table class="table table-sm table-borderless" width="100%">
+							<tr>
+								<td width="32%" style="text-align:left;">Luogo, data</td>
+								<td width="2%" style="text-align:left;" />
+								<td width="32%" style="text-align:left;">Committente</td>
+								<td width="2%" style="text-align:left;" />
+								<td width="32%" style="text-align:left;">Firma</td>
+							</tr>
+							<tr>
+								<td width="32%" style="text-align:left;color:transparent;border: 1px solid black;"><span>&amp;<br /></span></td>
+								<td width="2%" style="text-align:left;" />
+								<td width="32%" style="text-align:left;color:transparent;border: 1px solid black;"><span>&amp;<br /></span></td>
+								<td width="2%" style="text-align:left;" />
+								<td width="32%" style="text-align:left;color:transparent;border: 1px solid black;"><span>&amp;<br /></span></td>
+							</tr>
+						</table>
+                        </div>
+					</div>
+
+
+
+				</div>
+			</div>
+		</t>
+    </template>
+
+	<template id="report_so_solare">
+		<t t-call="web.html_container">
+			<t t-foreach="docs" t-as="doc">
+				<t t-call="tw_extend.report_so_solare_doc" t-lang="doc.partner_id.lang" />
+			</t>
+		</t>
+	</template>
+
+	<record id="solare_so_report" model="ir.actions.report">
+		<field name="name">Offerta completa</field>
+		<field name="model">sale.order</field>
+		<field name="report_type">qweb-pdf</field>
+		<field name="report_name">tw_extend.report_so_solare</field>
+		<field name="print_report_name">((object.name)+'_'+(object.client_order_ref or '/'))</field>
+		<field name="binding_model_id" ref="sale.model_sale_order" />
+		<field name="binding_type">report</field>
+	</record>
+
+	<record id="sale_timesheet.timesheet_report_sale_order" model="ir.actions.report">
+	    <field name="binding_model_id" eval="False" />
+	</record>
+
+	<record id="sale.action_report_saleorder" model="ir.actions.report">
+	    <field name="binding_model_id" eval="False" />
+	</record>
+
+</odoo>

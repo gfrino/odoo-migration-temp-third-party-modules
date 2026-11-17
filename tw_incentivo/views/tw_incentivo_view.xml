@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+
+        <record id="view_tw_incentivo_form" model="ir.ui.view">
+            <field name="name">view.tw.incentivo.form</field>
+            <field name="model">tw.incentivo</field>
+            <field name="arch" type="xml">
+                <form string="Incentivo">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name" required="1"/>
+                            </group>
+                            <group>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Lines" name="service_lines">
+                                <field name="line_ids">
+                                    <list editable="bottom">
+                                        <field name="data_inizio" optional="show"/>
+                                        <field name="data_fine" optional="show"/>
+                                        <field name="tipo_di_installazione" optional="show"/>
+                                        <field name="autoconsumo" optional="show"/>
+                                        <field name="facciata" optional="show"/>
+                                        <field name="less_30" optional="show"/>
+                                        <field name="great_30" optional="show"/>
+                                    </list>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_tw_incentivo_tree" model="ir.ui.view">
+            <field name="name">view.tw.incentivo.tree</field>
+            <field name="model">tw.incentivo</field>
+            <field name="arch" type="xml">
+                <list string="Incentivo">
+                    <field name="name" />
+                </list>
+            </field>
+        </record>
+        <record id="action_tw_incentivo" model="ir.actions.act_window">
+            <field name="name">Incentivo</field>
+            <field name="res_model">tw.incentivo</field>
+            <field name="view_mode">list,form</field>
+        </record>
+        <menuitem id="incentivo_menu_root"
+            name="Incentivo"
+            web_icon="tw_incentivo,static/description/icon.png"
+        />
+        <menuitem id="menu_tw_incentivo_form" action="action_tw_incentivo"
+            name="Incentivo" sequence="1"
+            parent="tw_incentivo.incentivo_menu_root" />
+
+    </data>
+</odoo>

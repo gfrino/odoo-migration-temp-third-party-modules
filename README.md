@@ -4,9 +4,33 @@ Su questa repo privata mettiamo tutti i moduli che migriamo durante le migrazion
 
 Una volta che il modulo ufficiale da parte degli sviluppatori di terze parti viene rilasciato, si dovrà eliminare il modulo da questa repo transitoria e installare sull'Odoo dove stiamo lavorando il modulo ufficiale.
 
-Un ramo per versione di Odoo (`20.0`, …). I moduli **nostri** (`tw_*`) non vanno qui: stanno in `extra-addons-tw`.
+Un ramo per versione di Odoo (`20.0`, …).
 
-## Moduli presenti — ramo 20.0
+Qui stanno anche i moduli **nostri** (`tw_*`) che **non sono adatti alla vendita al pubblico**: moduli fatti per un
+solo cliente, aiuti di migrazione, moduli che funzionano solo insieme a un'altra personalizzazione. Il repo
+`extra-addons-tw` è letto dall'Odoo Apps Store, che mette in vendita ogni modulo che trova: lì vanno solo i moduli
+vendibili, con prezzo, copertina, icona e pagina descrittiva. Questo repo è privato e lo store non lo legge.
+
+## Moduli ticinoWEB non in vendita — ramo 20.0
+
+Spostati da `extra-addons-tw` il 2026-11-17.
+
+| Modulo | Perché non è in vendita |
+| --- | --- |
+| `tw_littleinka_kpi` | Dashboard vendite fatta per un cliente (nome del cliente in app, modelli e rotte); il mittente WooCommerce è nel suo tema |
+| `tw_extend` | Offerte e fatture di un installatore fotovoltaico: testi, luogo e firma del cliente nei report |
+| `tw_incentivo` | Tabelle degli incentivi usate solo da `tw_extend` |
+| `tw_sale_offer_light` | Offerte standard accanto a quelle di `tw_extend`: dipende da `tw_extend` |
+| `tw_invoice_light` | Fatture standard accanto a quelle di `tw_extend`: dipende da `tw_sale_offer_light` |
+| `tw_product_cost_update` | Data di aggiornamento del costo: dipende dai due moduli light |
+| `tw_legacy_chatter` | Aiuto di migrazione: mostra lo storico delle modifiche importato da una versione precedente |
+
+Note sul porting di `tw_extend` e `tw_incentivo`: [`docs/PORTING-20.0-tw_extend.md`](docs/PORTING-20.0-tw_extend.md).
+
+Se uno di questi moduli viene reso generico (niente dati o nomi di un cliente, nessuna dipendenza da personalizzazioni),
+può tornare in `extra-addons-tw` con prezzo, copertina, icona e pagina descrittiva.
+
+## Moduli di terze parti — ramo 20.0
 
 Stato verificato il 2026-11-04: nessuno è ancora presente nei rami 20.0 ufficiali di OCA (`partner-contact`, `project`, `web`, `spreadsheet`, `server-brand`, `website`, `server-ux`, `server-tools`).
 

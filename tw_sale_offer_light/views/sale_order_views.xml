@@ -1,0 +1,361 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+  <!--Native Odoo 20 sale form (LGPL-3), isolated from solar inherited views.-->
+  <record id="view_order_form_light" model="ir.ui.view">
+    <field name="name">sale.order.form.light</field>
+    <field name="model">sale.order</field>
+    <field name="priority">99</field>
+    <field name="arch" type="xml">
+      <form string="Offerta light" class="o_sale_order" js_class="sale_order_form">
+        <header>
+          <button string="Registra transazione" name="payment_action_capture" type="object" data-hotkey="shift+g" class="oe_highlight" invisible="not has_authorized_transaction_ids" />
+          <button string="Annulla transazione" name="payment_action_void" type="object" data-hotkey="shift+v" confirm="Annullare veramente la transazione autorizzata? Questa azione non può essere revocata." invisible="not has_authorized_transaction_ids" />
+          <button string="Crea fattura" id="create_invoice" name="%(sale.action_view_sale_advance_payment_inv)d" type="action" class="btn-primary" data-hotkey="q" invisible="invoice_status != 'to invoice' and not (has_overages and invoice_status == 'upselling')" />
+          <button string="Crea fattura" id="create_invoice_percentage" name="%(sale.action_view_sale_advance_payment_inv)d" type="action" context="{'default_advance_payment_method': 'percentage'}" data-hotkey="q" invisible="invoice_status != 'no' or state != 'sale'" />
+          <button string="Invia" id="quotation_send_primary" name="action_quotation_send" type="object" context="{'validate_analytic': True, 'check_document_layout': True}" class="btn-primary" data-hotkey="g" invisible="state != 'draft'" />
+          <button string="Invia fattura PROFORMA" id="send_proforma_primary" name="action_quotation_send" type="object" context="{'proforma': True, 'validate_analytic': True}" class="btn-primary" groups="sale.group_proforma_sales" invisible="state != 'draft' or invoice_count &gt;= 1" />
+          <button string="Conferma" id="action_confirm" name="action_confirm" type="object" context="{'validate_analytic': True}" class="btn-primary" data-hotkey="q" invisible="state != 'sent'" />
+          <button string="Scarica offerta" name="action_print_light_offer" type="object" data-hotkey="i" />
+          <button string="Conferma" name="action_confirm" type="object" context="{'validate_analytic': True}" data-hotkey="q" invisible="state != 'draft'" />
+          <button string="Invia fattura PROFORMA" id="send_proforma" name="action_quotation_send" type="object" context="{'proforma': True, 'validate_analytic': True}" invisible="state == 'draft' or invoice_count &gt;= 1" groups="sale.group_proforma_sales" />
+          <button string="Invia" id="quotation_send" name="action_quotation_send" type="object" context="{'validate_analytic': True, 'check_document_layout': True}" data-hotkey="g" invisible="state not in ('sent', 'sale')" />
+          <button string="Sblocca" name="action_unlock" type="object" invisible="not locked" groups="sales_team.group_sale_manager" />
+          <button string="Anteprima" name="action_preview_sale_order" type="object" class="btn-secondary" />
+          <button string="Annulla" name="action_cancel" type="object" confirm-title="Annulla ordine" confirm="L'annullamento di questo ordine ne imposterà lo stato su &quot;Annullato&quot; e aggiornerà i documenti e i processi correlati. Sei sicuro?" confirm-label="Sì, annulla l'ordine" cancel-label="No, torna indietro" data-hotkey="x" invisible="state not in ['draft', 'sent', 'sale'] or not id or locked" />
+          <button string="Imposta a preventivo" name="action_draft" type="object" data-hotkey="w" invisible="state != 'cancel'" />
+          <t groups="sale.group_auto_done_setting">
+            <button string="Blocca" name="action_lock" type="object" help="Se la vendita è bloccata, non può più essere modificata. Tuttavia, sarà ancora possibile fatturare o consegnare." invisible="locked or state != 'sale'" groups="sales_team.group_sale_manager" />
+          </t>
+          <button string="Riapri fatturazione" name="action_reopen_order" type="object" class="btn-primary" invisible="not invoicing_closed or state != 'sale'" groups="sales_team.group_sale_manager" />
+          <field name="state" widget="statusbar" statusbar_visible="draft,sent,sale" />
+        </header>
+        <div class="alert alert-warning" role="alert" invisible="not sale_warning_text">
+          <field name="sale_warning_text" class="fw-bold" />
+        </div>
+        <div class="alert alert-warning" role="alert" invisible="partner_credit_warning == ''">
+          <field name="partner_credit_warning" />
+        </div>
+        <div class="alert alert-warning p-3 text-center" role="alert" invisible="state not in ['draft', 'sent'] or not has_archived_products">
+          <span>Attenzione: il preventivo contiene prodotti archiviati</span>
+        </div>
+        <div class="alert alert-warning w-100 d-flex align-items-center gap-1" invisible="state != 'draft' or not duplicated_order_ids" role="alert">
+          <span>Avviso: l'ordine può essere un duplicato di</span>
+          <field name="duplicated_order_ids" widget="x2many_buttons" string="Documenti duplicati" />
+        </div>
+        <sheet>
+          <div class="oe_button_box" name="button_box">
+            <button name="action_view_invoice" type="object" class="oe_stat_button" icon="edit_square" invisible="invoice_count == 0">
+              <field name="invoice_count" widget="statinfo" string="Fatture" />
+            </button>
+            <button name="action_view_payment_transaction" type="object" class="oe_stat_button" icon="payments" groups="account.group_account_invoice,base.group_no_one">
+              <field name="transaction_count" widget="statinfo" string="Pagamenti" />
+            </button>
+          </div>
+          <div class="badge rounded-pill text-bg-secondary float-end fs-6 border-0" invisible="not locked">
+            <i class="oi" data-icon="lock" />
+                    Bloccato
+                </div>
+          <div class="oe_title">
+            <h1 class="o_outlined">
+              <field name="name" readonly="1" />
+            </h1>
+          </div>
+          <group name="sale_header">
+            <group name="partner_details">
+              <field name="partner_id" widget="res_partner_many2one" context="{'res_partner_search_mode': 'customer', 'show_address': 1, 'show_identifier': True}" placeholder="Scrivi per cercare un cliente..." readonly="state in ['cancel', 'sale']" />
+              <field name="partner_invoice_id" groups="account.group_delivery_invoice_address" options="{'no_quick_create': True}" context="{'default_type': 'invoice', 'show_address': False, 'show_identifier': False, 'default_parent_id': partner_id}" readonly="state == 'cancel' or locked" />
+              <field name="partner_shipping_id" groups="account.group_delivery_invoice_address" options="{'no_quick_create': True}" context="{'default_type': 'delivery', 'show_address': False, 'show_identifier': False, 'default_parent_id': partner_id}" readonly="state == 'cancel' or locked" />
+            </group>
+            <group name="order_details">
+              <field name="validity_date" invisible="state == 'sale'" readonly="state in ['cancel', 'sale']" />
+              <div class="o_td_label" groups="base.group_no_one" invisible="state in ['sale', 'cancel']">
+                <label for="date_order" string="Data preventivo" />
+              </div>
+              <field name="date_order" nolabel="1" groups="base.group_no_one" invisible="state in ['sale', 'cancel']" readonly="state in ['cancel', 'sale']" />
+              <div class="o_td_label" invisible="state in ['draft', 'sent']">
+                <label for="date_order" string="Data ordine" />
+              </div>
+              <field name="date_order" nolabel="1" invisible="state in ['draft', 'sent']" readonly="state in ['cancel', 'sale']" />
+              <label for="pricelist_id" string="Listino prezzi" />
+              <div class="o_row">
+                <field name="pricelist_id" options="{'no_open': True, 'no_create': True}" readonly="state in ['cancel', 'sale']" />
+              </div>
+              <field name="currency_id" invisible="1" />
+              <field name="sale_order_template_id" string="Modello Light" domain="[('is_light_offer', '=', True), ('template_type', '=', 'quotation'), '|', ('company_id', '=', False), ('company_id', '=', company_id)]" context="{'default_is_light_offer': True}"/>
+              <field name="payment_term_id" placeholder="Immediato" options="{'no_open': True, 'no_create': True}" />
+              <label for="commitment_date" invisible="state == 'draft'" />
+              <label for="commitment_date" string="Data consegna" invisible="state != 'draft'" />
+              <div name="commitment_date_div" class="o_row align-items-center">
+                <field name="commitment_date" options="{'placeholder_field': 'expected_date'}" readonly="state == 'cancel' or locked" />
+                <field name="delivery_status" widget="badge" decoration-success="delivery_status == 'full'" decoration-warning="delivery_status == 'partial'" decoration-info="delivery_status in ['pending', 'started']" invisible="state != 'sale'" />
+              </div>
+              <field name="expected_date" invisible="1" />
+            </group>
+            <div>
+              <field name="document_tax_mode" id="document_tax_mode_mobile" class="tax_mode_badge d-md-none" widget="document_tax_mode_selector" nolabel="True" readonly="state != 'draft'" />
+            </div>
+          </group>
+          <notebook>
+            <page string="Righe ordine" name="order_lines">
+              <div class="position-relative document_tax_mode">
+                <field name="document_tax_mode" id="document_tax_mode" class="overlap_badge_tab tax_mode_badge d-none d-md-block" widget="document_tax_mode_selector" nolabel="True" readonly="state != 'draft'" />
+              </div>
+              <field name="order_line" widget="sol_o2m" mode="list,kanban" class="o_sale_order_line_o2m" readonly="state == 'cancel' or locked" aggregated_fields="price_subtotal,price_total" options="{'hide_composition': True, 'hide_prices': True, 'subsections': True}">
+                <form>
+                  <field name="technical_price_unit" invisible="1" />
+                  <field name="sequence" invisible="1" />
+                  <field name="display_type" invisible="1" />
+                  <group>
+                    <group invisible="display_type">
+                      <label for="product_id" />
+                      <div class="d-flex align-items-baseline">
+                        <span class="oi text-warning me-1" data-icon="warning" title="This product is archived" invisible="state not in ['draft', 'sent'] or not is_product_archived" />
+                        <field name="product_id" context="{                                                     'default_uom_id': product_uom_id,                                                     'partner_id': parent.partner_id,                                                 }" readonly="not product_updatable" required="mandatory_product and not display_type and not is_downpayment" force_save="1" widget="many2one_barcode" />
+                      </div>
+                      <field name="name" />
+                      <label for="product_uom_qty" />
+                      <div class="o_row" name="ordered_qty">
+                        <field name="product_uom_qty" />
+                        <field name="product_uom_id" force_save="1" groups="uom.group_uom" class="oe_no_button" widget="many2one_uom" readonly="product_uom_readonly" required="not display_type and not is_downpayment" />
+                        <widget name="simple_qty_at_date_widget" />
+                      </div>
+                      <label for="qty_delivered" string="Consegnati" invisible="parent.state != 'sale'" />
+                      <div name="delivered_qty" invisible="parent.state != 'sale'">
+                        <field name="qty_delivered" readonly="qty_delivered_method != 'manual'" />
+                      </div>
+                      <label for="qty_invoiced" string="Fatturati" invisible="parent.state != 'sale'" />
+                      <div name="invoiced_qty" invisible="parent.state != 'sale'">
+                        <field name="qty_invoiced" />
+                      </div>
+                      <field name="price_unit" />
+                      <field name="tax_ids" widget="many2many_tax_tags" options="{'no_create': True}" context="{'search_view_ref': 'account.account_tax_view_search'}" readonly="qty_invoiced &gt; 0" />
+                      <t groups="sale.group_discount_per_so_line">
+                        <label for="discount" />
+                        <div name="discount">
+                          <field name="discount" class="oe_inline" /> %
+                                            </div>
+                      </t>
+                    </group>
+                    <group invisible="display_type">
+                      <label for="customer_lead" />
+                      <div name="lead">
+                        <field name="customer_lead" class="oe_inline" readonly="product_type != 'consu'" /> giorni
+                                        </div>
+                      <field name="analytic_distribution" widget="analytic_distribution" groups="analytic.group_analytic_accounting" options="{'product_field': 'product_id', 'business_domain': 'sale_order'}" />
+                    </group>
+                  </group>
+                  <label for="name" string="Nome sezione (es. prodotti, servizi)" invisible="display_type != 'line_section'" />
+                  <label for="name" string="Nome sottosezione" invisible="display_type != 'line_subsection'" />
+                  <label for="name" string="Nota" invisible="display_type != 'line_note'" />
+                  <field name="name" invisible="not display_type" />
+                  <group>
+                    <field name="collapse_composition" string="Nascondi composizione" invisible="display_type not in ['line_section', 'line_subsection']" readonly="1" />
+                    <field name="collapse_prices" string="Nascondi prezzi" invisible="display_type not in ['line_section', 'line_subsection']" readonly="1" />
+                    <field name="is_optional" invisible="1" />
+                  </group>
+                  <field name="invoice_lines" invisible="1" />
+                </form>
+                <list name="sol_list" string="Righe ordine di vendita" editable="bottom" decoration-warning="(state in ['draft', 'sent'] and is_product_archived) or sale_line_warn_msg">
+                  <control>
+                    <create string="Aggiungi riga" name="add_product_control" data-hotkey="shift+p" />
+                    <create string="Aggiungi sezione" name="add_section_control" data-hotkey="shift+h" context="{'default_display_type': 'line_section'}" />
+                    <create string="Aggiungi nota" name="add_note_control" data-hotkey="shift+n" context="{'default_display_type': 'line_note'}" />
+                    <button string="Catalogo" data-hotkey="shift+k" name="action_add_from_catalog" type="object" class="px-4 btn-link" context="{'order_id': parent.id}" />
+                  </control>
+                  <field name="display_type" column_invisible="True" />
+                  <field name="product_custom_attribute_value_ids" column_invisible="1">
+                    <list>
+                      <field name="custom_product_template_attribute_value_id" />
+                      <field name="custom_value" />
+                    </list>
+                  </field>
+                  <field name="product_no_variant_attribute_value_ids" column_invisible="1" />
+                  <field name="technical_price_unit" column_invisible="1" />
+                  <field name="linked_line_id" column_invisible="1" />
+                  <field name="combo_item_id" column_invisible="1" />
+                  <field name="selected_combo_items" column_invisible="1" />
+                  <field name="virtual_id" column_invisible="1" />
+                  <field name="linked_virtual_id" column_invisible="1" />
+                  <field name="collapse_composition" column_invisible="1" />
+                  <field name="collapse_prices" column_invisible="1" />
+                  <field name="is_optional" column_invisible="1" />
+                  <field name="currency_id" column_invisible="True" />
+                  <field name="sequence" invisible="combo_item_id" widget="handle" />
+                  <widget name="line_number" nolabel="1" column_invisible="not parent.show_sol_numbers" width="29px" />
+                  <column name="product_and_description" string="Descrizione">
+                    <field name="product_template_id" string="Prodotto" readonly="id and not product_updatable" required="mandatory_product and not display_type and not is_downpayment" context="{                                             'default_list_price': price_unit,                                             'default_uom_id': product_uom_id,                                             'partner_id': parent.partner_id,                                         }" optional="hide" widget="sol_product_many2one" placeholder="Scrivi per cercare un prodotto..." invisible="display_type" />
+                    <field name="product_id" string="Variante prodotto" readonly="not product_updatable" required="mandatory_product and not display_type and not is_downpayment" force_save="1" context="{                                             'default_lst_price': price_unit,                                             'default_uom_id': product_uom_id,                                             'partner_id': parent.partner_id,                                         }" optional="hide" widget="sol_product_many2one" placeholder="Scrivi per cercare un prodotto..." invisible="display_type" />
+                    <field name="name" placeholder="Inserisci una descrizione..." decoration-it="not display_type" required="display_type" widget="text" />
+                    <field name="label" widget="sol_label_text" context="{'partner_id': parent.partner_id}" invisible="display_type" required="1" />
+                  </column>
+                  <field name="analytic_distribution" widget="analytic_distribution" options="{                                         'product_field': 'product_id',                                         'business_domain': 'sale_order',                                         'amount_field': 'price_subtotal',                                     }" optional="hide" groups="analytic.group_analytic_accounting" />
+                  <column name="sol_qty">
+                    <field name="product_uom_qty" invisible="display_type" decoration-info="(not display_type and invoice_status == 'to invoice')" decoration-bf="(not display_type and invoice_status == 'to invoice')" readonly="is_downpayment" />
+                    <field name="section_qty" invisible="display_type not in ('line_section', 'line_subsection')" class="fw-normal text-muted" />
+                  </column>
+                  <widget name="simple_qty_at_date_widget" width="20px" />
+                  <column name="sol_uom" width="60px" groups="uom.group_uom">
+                    <field name="product_uom_id" invisible="display_type" force_save="1" readonly="product_uom_readonly" required="not display_type and not is_downpayment" widget="many2one_uom" optional="show" options="{'no_open': True, 'no_create': True}" />
+                    <field name="section_uom_id" invisible="display_type not in ('line_section', 'line_subsection')" options="{'no_open': True, 'no_create': True}" class="fw-normal text-muted" />
+                  </column>
+                  <column column_invisible="parent.state != 'sale'">
+                    <field name="qty_delivered" string="Consegnati" invisible="display_type" decoration-info="(not display_type and invoice_status == 'to invoice')" decoration-bf="(not display_type and invoice_status == 'to invoice')" decoration-danger="qty_overage and qty_delivered &gt; qty_invoiced" readonly="qty_delivered_method != 'manual' or is_downpayment" optional="show" />
+                    <field name="qty_delivered_percent" widget="labeled_percentage_field" invisible="display_type" decoration-info="(not display_type and invoice_status == 'to invoice')" decoration-bf="(not display_type and invoice_status == 'to invoice')" readonly="qty_delivered_method != 'manual' or is_downpayment or product_uom_qty == 0" optional="hide" />
+                  </column>
+                  <field name="qty_invoiced" string="Fatturati" decoration-info="(not display_type and invoice_status == 'to invoice')" decoration-bf="(not display_type and invoice_status == 'to invoice')" column_invisible="parent.state != 'sale'" optional="show" />
+                  <field name="customer_lead" optional="hide" width="80px" readonly="parent.state not in ['draft', 'sent', 'sale'] or is_downpayment or product_type != 'consu'" />
+                  <column name="price_unit">
+                    <field name="price_unit" invisible="display_type" readonly="qty_invoiced &gt; 0" />
+                  </column>
+                  <field name="tax_ids" widget="many2many_tax_tags" options="{'no_create': True}" context="{'active_test': True}" readonly="qty_invoiced &gt; 0 or is_downpayment" optional="show" />
+                  <field name="discount" string="Sconto %" groups="sale.group_discount_per_so_line" width="50px" optional="show" />
+                  <column column_invisible="parent.document_tax_mode == 'tax_included'">
+                    <field name="price_subtotal" string="Importo" invisible="is_downpayment" />
+                    <field name="price_subtotal" string="Imponibile" invisible="display_type or is_downpayment" widget="labeled_monetary_field" optional="hide" />
+                    <field name="price_total" string="Tasse incl." invisible="display_type or is_downpayment" widget="labeled_monetary_field" optional="hide" />
+                  </column>
+                  <column column_invisible="parent.document_tax_mode == 'tax_excluded'">
+                    <field name="price_total" string="Importo" invisible="is_downpayment" />
+                    <field name="price_subtotal" string="Imponibile" invisible="display_type or is_downpayment" widget="labeled_monetary_field" optional="hide" />
+                    <field name="price_total" string="Tasse incl." invisible="display_type or is_downpayment" widget="labeled_monetary_field" optional="hide" />
+                  </column>
+                  <widget options="{'is_optional': 'radio_button_checked'}" name="section_state" />
+                </list>
+                <kanban class="o_kanban_mobile">
+                  <field name="product_custom_attribute_value_ids" column_invisible="1" />
+                  <field name="product_template_id" column_invisible="1" />
+                  <field name="combo_item_id" column_invisible="1" />
+                  <field name="linked_line_id" column_invisible="1" />
+                  <field name="selected_combo_items" column_invisible="1" />
+                  <field name="virtual_id" column_invisible="1" />
+                  <field name="linked_virtual_id" column_invisible="1" />
+                  <field name="collapse_composition" column_invisible="1" />
+                  <field name="collapse_prices" column_invisible="1" />
+                  <field name="is_optional" column_invisible="1" />
+                  <field name="product_no_variant_attribute_value_ids" column_invisible="1" />
+                  <field name="technical_price_unit" column_invisible="1" />
+                  <field name="display_type" />
+                  <field name="currency_id" />
+                  <field name="sequence" invisible="combo_item_id" widget="handle" />
+                  <control>
+                    <create string="Riga" name="add_product_control" />
+                    <create string="Sezione" name="add_section_control" context="{'default_display_type': 'line_section'}" />
+                    <create string="Nota" name="add_note_control" context="{'default_display_type': 'line_note'}" />
+                    <button string="Catalogo" name="action_add_from_catalog" type="object" class="btn-secondary" context="{'order_id': parent.id}" />
+                  </control>
+                  <templates>
+                    <t t-name="card" class="row g-0 ps-0 pe-0">
+                      <t t-if="!record.display_type.raw_value">
+                        <aside t-if="record.product_id.value" class="col-auto p-1 pe-2 d-flex align-items-start">
+                          <span t-att-title="record.product_id.value" class="d-inline-block flex-shrink-0">
+                            <field name="product_id" widget="image" options="{'size': [38, 38], 'preview_image': 'image_128', 'img_class': 'object-fit-contain rounded'}" />
+                          </span>
+                        </aside>
+                        <main class="col">
+                          <div class="row">
+                            <div class="col">
+                              <span class="oi text-warning me-1" data-icon="warning" title="This product is archived" invisible="state not in ['draft', 'sent'] or not is_product_archived" />
+                              <field t-if="record.product_id.value" name="product_id" class="fw-bold" />
+                              <field t-else="" name="name" class="fw-bold" />
+                            </div>
+                            <div class="col-auto">
+                              <field name="price_subtotal" class="fw-bolder float-end pe-1" widget="monetary" />
+                            </div>
+                          </div>
+                          <div class="text-muted">
+                                                    Quantità:
+                                                    <field name="product_uom_qty" />
+                            <field name="product_uom_id" />
+                          </div>
+                          <t t-if="record.discount?.raw_value">
+                            <div class="text-muted">
+                                                        Sconto:
+                                                        <field name="discount" />%
+                                                    </div>
+                          </t>
+                        </main>
+                      </t>
+                      <t t-if="['line_section', 'line_subsection', 'line_note'].includes(record.display_type.raw_value)">
+                        <div t-att-class="{                                                 'fw-bolder': record.display_type.raw_value === 'line_section',                                                 'fw-bold': record.display_type.raw_value === 'line_subsection',                                                 'fst-italic': record.display_type.raw_value === 'line_note',                                             }">
+                          <field name="name" />
+                        </div>
+                      </t>
+                    </t>
+                  </templates>
+                </kanban>
+              </field>
+              <div class="float-md-end d-flex flex-fill d-print-none gap-1 mb-2" name="so_button_below_order_lines">
+                <button string="Sconto" name="action_open_discount_wizard" type="object" class="btn btn-secondary d-none d-md-block" groups="sale.group_discount_per_so_line" invisible="locked or state == 'cancel'" />
+                <button string="Sconti" name="action_open_discount_wizard" type="object" class="btn btn-secondary d-none d-md-block" groups="sale.group_discount_per_so_line" disabled="1" invisible="not (locked or state == 'cancel')" />
+                <widget name="combo_menu" class="mb-0 flex-grow-1 d-md-none" />
+                <widget name="discount_menu" groups="sale.group_discount_per_so_line" invisible="locked or state == 'cancel'" class="mb-0 flex-grow-1 d-md-none" />
+              </div>
+              <group name="note_group" col="6" class="mt-2 mt-md-0">
+                <group colspan="4" class="order-1 order-lg-0">
+                  <field colspan="2" name="note" nolabel="1" placeholder="Termini e condizioni..." />
+                </group>
+                <group class="oe_subtotal_footer border-top-0 d-flex order-0 order-lg-1 flex-column gap-3" colspan="2" name="sale_total">
+                  <field name="tax_totals" widget="account-tax-totals-field" nolabel="1" readonly="1" />
+                  <field name="extra_total_fields" widget="sale-extra-totals" nolabel="1" readonly="1" />
+                </group>
+              </group>
+            </page>
+            <page string="Altre informazioni" name="other_information">
+              <group>
+                <group name="confirmation_info" string="Conferma">
+                  <field name="require_signature" widget="boolean_toggle" readonly="state in ['cancel', 'sale']" />
+                  <label for="prepayment_percent" class="text-nowrap" />
+                  <span class="d-inline-flex align-items-baseline">
+                    <field name="prepayment_percent" readonly="state in ['cancel', 'sale']" widget="percentage" class="oe_inline" />
+                    <field name="prepayment_amount" readonly="state in ['cancel', 'sale']" widget="monetary" class="ms-3 oe_inline text-muted" />
+                  </span>
+                </group>
+                <group name="sales_person" string="Vendite">
+                  <field name="user_id" widget="many2one_avatar_user" />
+                  <field name="team_id" context="{'kanban_view_ref': 'sales_team.crm_team_view_kanban'}" options="{'no_create': True}" />
+                  <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company" />
+                  <field name="reference" readonly="1" invisible="not reference" />
+                  <field name="client_order_ref" />
+                  <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'on_tag_click': 'edit_color', 'no_create_edit': True}" />
+                </group>
+                <group name="sale_info" string="Fatturazione">
+                  <label for="fiscal_position_id" />
+                  <div class="o_row">
+                    <field name="fiscal_position_id" options="{'no_create': True}" />
+                  </div>
+                  <field name="preferred_payment_method_line_id" />
+                  <field name="partner_invoice_id" groups="!account.group_delivery_invoice_address" invisible="1" />
+                  <field name="journal_id" groups="base.group_no_one" readonly="invoice_count != 0 and state == 'sale'" />
+                  <field name="invoice_status" invisible="state != 'sale'" groups="base.group_no_one" />
+                  <field name="invoice_status" invisible="1" groups="!base.group_no_one" />
+                </group>
+                <group name="sale_shipping" string="Spedizione">
+                  <field name="incoterm" options="{'no_open': True, 'no_create': True}" />
+                  <field name="incoterm_location" />
+                </group>
+                <group name="sale_reporting" string="Tracciabilità">
+                  <field name="origin" />
+                  <field name="campaign_id" options="{'create_name_field': 'title'}" />
+                  <field name="medium_id" readonly="1" />
+                  <field name="source_id" />
+                  <field name="utm_reference" string="Riferimento" options="{'hide_model': True}" invisible="not utm_reference" readonly="True" />
+                </group>
+              </group>
+            </page>
+          </notebook>
+        </sheet>
+        <chatter />
+        <field name="is_light_offer" invisible="1" force_save="1" />
+      </form>
+    </field>
+  </record>
+  <record id="action_light_offers" model="ir.actions.act_window">
+    <field name="name">Offerta light</field>
+    <field name="res_model">sale.order</field>
+    <field name="view_mode">list,form</field>
+    <field name="domain">[('is_light_offer', '=', True)]</field>
+    <field name="context">{'default_is_light_offer': True, 'default_sale_order_template_id': False}</field>
+    <field name="view_ids" eval="[(5, 0, 0), (0, 0, {'view_mode': 'list', 'view_id': ref('sale.view_quotation_tree')}), (0, 0, {'view_mode': 'form', 'view_id': ref('view_order_form_light')})]" />
+  </record>
+  <menuitem id="menu_light_offers" name="Offerta light" parent="sale.sale_menu_root" action="action_light_offers" sequence="15" groups="sales_team.group_sale_salesman" />
+</odoo>

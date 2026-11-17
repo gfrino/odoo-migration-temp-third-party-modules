@@ -1,0 +1,241 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+
+	<template id="report_invoice_customize_pons" inherit_id="account.report_invoice_document">
+        <xpath expr="//t[@t-set='display_taxes']" position="attributes">
+            <attribute name="t-value">False</attribute>
+        </xpath>
+    </template>
+
+	<template id="report_inv_solare_doc">
+		<t t-set="o" t-value="doc" />
+			<t t-set="address">
+					<t t-if="doc.partner_id.title">
+						<span t-out="doc.partner_id.title.name" /><br />
+					</t>
+					<span t-out="doc.partner_id.name" /><br />
+					<span t-if="doc.partner_id.street">
+						<span t-out="doc.partner_id.street" /><br />
+					</span>
+					<span t-if="doc.partner_id.street2">
+						<t t-out="doc.partner_id.street2" /><br />
+					</span>
+					<span t-if="doc.partner_id.zip">
+						<t t-out="doc.partner_id.zip" />
+					</span>
+					<span t-if="doc.partner_id.city">
+						<t t-out="doc.partner_id.city" />
+					</span><br />
+					<span t-if="doc.partner_id.country_id">
+						<t t-out="doc.partner_id.country_id.name" /><br />
+					</span>
+					<div t-field="doc.partner_id.vat" />
+				</t>
+				<t t-call="web.external_layout" o="o" address="address">
+			<div class="page">
+				<div class="col-auto col-4 mw-100 mb-2">
+					Maggia, <span t-field="o.invoice_date" />
+				</div>
+				<div><b>Fattura - nr. </b><span t-field="o.name" /></div>
+				<br />
+
+				<span t-field="o.partner_id.title.name" /> <span t-field="o.partner_id.name" /> <br />
+				di seguito il conteggio a seguito dell'ultimazione dei lavori.
+				<br /><br />
+				<table class="table table-sm table-borderless; font-size:14px;" width="100%">
+					<tr>
+						<td width="18%">Progetto nr:</td>
+						<td width="82%"><span t-field="o.solare_id.name" /> </td>
+					</tr>
+					<tr>
+						<td width="18%">Oggetto:</td>
+						<td width="82%"><span t-field="o.ref" /> </td>
+					</tr>
+					<tr>
+						<td width="18%"><span t-field="o.data_fine_lavori_text" /></td>
+						<td width="82%"><span t-field="o.data_fine_lavori" /> </td>
+					</tr>
+				</table>
+				<br /><br />
+				<span><b>Saldo finale a nostro favore</b></span>
+				<br /><br />
+				<span>Dettaglio completo a pagina seguente.</span><br /><br />
+				<span t-out="o.invoice_payment_term_id.name" /><br /><br />
+				<span>Cogliamo l'occasione per ringraziarvi della fiducia accordataci e porgere i più cordiali saluti.</span><br /><br />
+				<br /><br /><br /><br /><br />
+				<table class="table table-sm table-borderless" style="font-size:14px;" width="100%">
+					<tr>
+						<td width="55%" />
+						<td width="45%">Pons Energia Solare</td>
+					</tr>
+				</table>
+
+				<div style="page-break-before: always;font-size:14px;">
+					<span style="color:blue;"><b>Costo materiale e prestazioni</b></span>
+					<table class="table table-bordered mt32" style="font-size:14px;" width="100%">
+						<thead style="background-color:#f9b001;">
+							<th width="60%" style="text-align:left;">Articolo / Prestazione</th>
+							<th width="10%" style="text-align:right;">Qta.</th>
+							<th width="15%" style="text-align:right;">Costo unit.</th>
+							<th width="15%" style="text-align:right;">Totale</th>
+						</thead>
+						<tbody>
+							<t t-set="product_category" t-value="[]" />
+							<t t-foreach="o.invoice_line_ids" t-as="l">
+								<t t-if="l.product_id.categ_id not in product_category">
+									<t t-set="product_category" t-value="product_category+[l.product_id.categ_id]" />
+								</t>
+							</t>
+							<t t-foreach="product_category" t-as="category">
+								<t t-if="category.name == 'Acconti'">
+									<t t-foreach="o.invoice_line_ids" t-as="l">
+										<t t-if="category.id==l.product_id.categ_id.id and l.product_id.name == 'Acconto'">
+											<tr>
+												<td width="60%" style="text-align:left;margin:3px;"><b>Totale parziale IVA esclusa</b></td>
+												<td width="10%" align="right" />
+												<td width="15%" align="right" />
+												<td width="15%" align="right"><b><span t-field="o.solare_id.amount_total" /></b></td>
+											</tr>
+										</t>
+									</t>
+								</t>
+								<tr t-if="category.name">
+									<td width="60%"><b><span t-field="category.name" /></b></td>
+									<td width="10%" />
+									<td width="15%" />
+									<td width="15%" />
+								</tr>
+								<t t-foreach="o.invoice_line_ids" t-as="l">
+									<tr t-if="category.id==l.product_id.categ_id.id and l.display_type not in ['line_section', 'line_note']">
+										<td width="60%" style="text-align:left;margin:3px;"><span t-field="l.name" /></td>
+										<td width="10%" align="right"><span t-field="l.quantity" /></td>
+										<t t-if="l.product_id.name != 'Acconto'">
+											<td width="15%" align="right"><span t-field="l.price_unit" /></td>
+										</t>
+										<t t-if="l.product_id.name == 'Acconto'">
+											<td width="15%" align="right" />
+										</t>
+										<td width="15%" align="right"><span t-field="l.price_subtotal" /></td>
+									</tr>
+								</t>
+							</t>
+							<tr>
+								<td width="60%" style="text-align:left;margin:3px;"><b>Costo totale (IVA escl.)</b></td>
+								<td width="10%" align="right" />
+								<td width="15%" align="right" />
+								<td width="15%" align="right"><span t-field="o.amount_untaxed" /></td>
+							</tr>
+							<t t-if="o.sconto_amount">
+								<tr>
+									<td width="60%" style="text-align:left;margin:3px;">Sconto</td>
+									<t t-if="o.sconto_dis_type == 'percent'">
+										<td width="10%" align="right"><span t-field="o.sconto_tax" />%</td>
+									</t>
+									<t t-if="o.sconto_dis_type == 'fixed'">
+
+										<td width="10%" align="right" />
+									</t>
+									<td width="15%" align="right" />
+									<td width="15%" align="right">- <span t-out="o.sconto_amount" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+								</tr>
+							</t>
+							<t t-if="o.tw_disc_amt">
+								<tr>
+									<td width="60%" style="text-align:left;margin:3px;">Sconto</td>
+									<t t-if="o.tw_dis_type == 'percent'">
+										<td width="10%" align="right"><span t-field="o.tw_disc" />%</td>
+									</t>
+									<t t-if="o.tw_dis_type == 'fixed'">
+
+										<td width="10%" align="right" />
+									</t>
+									<td width="15%" align="right" />
+									<td width="15%" align="right">- <span t-out="o.tw_disc_amt" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+								</tr>
+							</t>
+							<tr>
+								<td width="60%" style="text-align:left;margin:3px;"><b>Totale parziale</b></td>
+								<td width="10%" align="right" />
+								<td width="15%" align="right" />
+								<td width="15%" align="right"><b><span t-out="o.after_tw_amt" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></b></td>
+							</tr>
+							<tr>
+								<td width="60%" style="text-align:left;margin:3px;">IVA</td>
+								<td width="10%" align="right"><t t-if="o.so_taxes_id"><span t-field="o.so_taxes_id[0].name" /></t></td>
+								<td width="15%" align="right" />
+								<td width="15%" align="right"><span t-out="o.so_tax_after_discount" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+							</tr>
+							<t t-if="o.disc_after_iva">
+								<tr>
+									<td width="60%" style="text-align:left;margin:3px;"><b>Totale IVA incl.</b></td>
+									<td width="10%" align="right" />
+									<td width="15%" align="right" />
+									<td width="15%" align="right"><b><span t-out="o.after_tw_amt + o.so_tax_after_discount" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></b></td>
+								</tr>
+								<tr>
+									<td width="60%" style="text-align:left;margin:3px;"><span t-field="o.disc_declaration" /></td>
+									<td width="10%" align="right" />
+									<td width="15%" align="right" />
+									<td width="15%" align="right">- <span t-out="o.disc_after_iva" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+								</tr>
+							</t>
+							<tr>
+								<td width="60%" style="text-align:left;margin:3px;"><b>Totale IVA incl.</b></td>
+								<td width="10%" align="right" />
+								<td width="15%" align="right" />
+								<td width="15%" align="right"><b><span t-field="o.amount_total" /></b></td>
+							</tr>
+							<t t-set="payments_vals" t-value="o.sudo().invoice_payments_widget and o.sudo().invoice_payments_widget['content'] or []" />
+							<t t-if="payments_vals">
+								<t t-foreach="payments_vals" t-as="payment_vals">
+									<t t-if="payment_vals['account_payment_id']">
+										<tr>
+											<td width="60%" style="text-align:left;margin:3px;"><span>Pagato il  </span> <span t-out="payment_vals['date']" t-options="{&quot;widget&quot;: &quot;date&quot;,&quot;format&quot;: &quot;dd/MM/yy&quot;}" /></td>
+											<td width="10%" align="right" />
+											<td width="15%" align="right" />
+											<td width="15%" align="right"><span> - </span><span t-out="payment_vals['amount']" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+										</tr>
+									</t>
+								</t>
+								<tr>
+									<td width="60%" style="text-align:left;margin:3px;"><b>Importo dovuto</b></td>
+									<td width="10%" align="right" />
+									<td width="15%" align="right" />
+									<td width="15%" align="right"><b><span t-field="o.amount_residual" /></b></td>
+								</tr>
+							</t>
+						</tbody>
+					</table>
+
+				</div>
+			</div>
+		</t>
+    </template>
+
+	<template id="report_inv_solare">
+		<t t-call="web.html_container">
+			<t t-foreach="docs" t-as="doc">
+				<t t-call="tw_extend.report_inv_solare_doc" t-lang="doc.partner_id.lang" />
+			</t>
+		</t>
+	</template>
+
+	<record id="solare_inv_report" model="ir.actions.report">
+		<field name="name">Solare</field>
+		<field name="model">account.move</field>
+		<field name="report_type">qweb-pdf</field>
+		<field name="report_name">tw_extend.report_inv_solare</field>
+		<field name="print_report_name">('Solare' + object.name)</field>
+		<field name="binding_model_id" ref="account.model_account_move" />
+		<field name="binding_type">report</field>
+	</record>
+
+
+	<record id="account.account_invoices_without_payment" model="ir.actions.report">
+	    <field name="binding_model_id" eval="False" />
+	</record>
+	<record id="sale_timesheet.timesheet_report_account_move" model="ir.actions.report">
+	    <field name="binding_model_id" eval="False" />
+	</record>
+
+</odoo>

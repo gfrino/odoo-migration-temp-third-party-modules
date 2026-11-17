@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_kpi_order_list" model="ir.ui.view">
+        <field name="name">tw.littleinka.kpi.order.list</field>
+        <field name="model">tw.littleinka.kpi.order</field>
+        <field name="arch" type="xml">
+            <list create="false" decoration-muted="not is_counted">
+                <field name="date_order"/>
+                <field name="number"/>
+                <field name="sede_id"/>
+                <field name="channel"/>
+                <field name="fulfilment" optional="show"/>
+                <field name="payment_group" optional="show"/>
+                <field name="state" optional="show"/>
+                <field name="item_count" optional="hide" sum="Pezzi"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="amount_net" sum="Totale"/>
+                <field name="is_counted" column_invisible="True"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_kpi_order_form" model="ir.ui.view">
+        <field name="name">tw.littleinka.kpi.order.form</field>
+        <field name="model">tw.littleinka.kpi.order</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="number"/></h1>
+                        <field name="sede_id"/>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date_order"/>
+                            <field name="channel"/>
+                            <field name="fulfilment"/>
+                            <field name="service_date"/>
+                            <field name="service_time"/>
+                            <field name="state"/>
+                            <field name="is_counted"/>
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="amount_total"/>
+                            <field name="amount_tax"/>
+                            <field name="amount_shipping"/>
+                            <field name="amount_discount"/>
+                            <field name="amount_refunded"/>
+                            <field name="amount_net"/>
+                            <field name="payment_method_title"/>
+                            <field name="postcode"/>
+                            <field name="city"/>
+                            <field name="coupons"/>
+                        </group>
+                    </group>
+                    <field name="line_ids">
+                        <list>
+                            <field name="name"/>
+                            <field name="category_name"/>
+                            <field name="quantity"/>
+                            <field name="currency_id" column_invisible="True"/>
+                            <field name="amount_total"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_kpi_order_search" model="ir.ui.view">
+        <field name="name">tw.littleinka.kpi.order.search</field>
+        <field name="model">tw.littleinka.kpi.order</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="number"/>
+                <field name="sede_id"/>
+                <field name="postcode"/>
+                <filter name="counted" string="Vendite" domain="[('is_counted', '=', True)]"/>
+                <filter name="not_counted" string="Annullati e non pagati" domain="[('is_counted', '=', False)]"/>
+                <separator/>
+                <filter name="date" string="Data" date="date_order"/>
+                <group>
+                    <filter name="by_sede" string="Sede" context="{'group_by': 'sede_id'}"/>
+                    <filter name="by_channel" string="Canale" context="{'group_by': 'channel'}"/>
+                    <filter name="by_day" string="Giorno" context="{'group_by': 'date_order:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_kpi_order" model="ir.actions.act_window">
+        <field name="name">Ordini online</field>
+        <field name="res_model">tw.littleinka.kpi.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_counted': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Ancora nessun ordine dai siti</p>
+            <p>Arrivano da soli quando il sito della sede ha l'indirizzo di Odoo e la chiave (WooCommerce → Odoo KPI).</p>
+        </field>
+    </record>
+</odoo>

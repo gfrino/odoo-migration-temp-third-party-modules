@@ -1,0 +1,175 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+
+	<template id="report_offerta_parziale_doc">
+		<t t-set="o" t-value="doc" />
+			<t t-set="address">
+					<t t-if="doc.partner_id.title">
+						<t t-out="doc.partner_id.title.name" />
+					</t>
+					<t t-out="doc.partner_id.name" /><br />
+					<span t-if="doc.partner_id.street">
+						<span t-out="doc.partner_id.street" /><br />
+					</span>
+					<span t-if="doc.partner_id.street2">
+						<t t-out="doc.partner_id.street2" /><br />
+					</span>
+					<span t-if="doc.partner_id.zip">
+						<t t-out="doc.partner_id.zip" />
+					</span>
+					<span t-if="doc.partner_id.city">
+						<t t-out="doc.partner_id.city" />
+					</span><br />
+					<span t-if="doc.partner_id.country_id">
+						<t t-out="doc.partner_id.country_id.name" /><br />
+					</span>
+					<div t-field="doc.partner_id.vat" />
+				</t>
+				<t t-call="web.external_layout" o="o" address="address">
+			<div class="page">
+				<div class="col-auto col-4 mw-100 mb-2">
+					Maggia, <span t-field="o.date_order" />
+				</div>
+				<div t-if="o.client_order_ref">
+					<span style="color:blue;">Offerta per <span t-field="o.client_order_ref" /></span>
+				</div>
+				<div><b>Offerta nr: </b><span t-field="o.name" /></div>
+				<br />
+
+				<div>
+					<span style="color:blue;"><b>Costo materiale e prestazioni</b></span>
+					<table class="table table-bordered mt32" width="100%">
+						<thead style="background-color:yellow;">
+							<th width="60%" style="text-align:left;">Articolo / Prestazione</th>
+							<th width="10%" style="text-align:right;">Qta.</th>
+							<th width="15%" style="text-align:right;">Costo unit.</th>
+							<th width="15%" style="text-align:right;">Totale</th>
+						</thead>
+						<tbody>
+							<t t-set="product_category" t-value="[]" />
+							<t t-foreach="o.order_line.filtered(lambda line: not line._pons_is_unselected_optional())" t-as="l">
+								<t t-if="l.product_id.categ_id not in product_category">
+									<t t-set="product_category" t-value="product_category+[l.product_id.categ_id]" />
+								</t>
+							</t>
+							<t t-foreach="product_category" t-as="category">
+								<tr>
+									<td width="60%"><b><span t-field="category.name" /></b></td>
+									<td width="10%" />
+									<td width="15%" />
+									<td width="15%" />
+								</tr>
+								<t t-foreach="o.order_line.filtered(lambda line: not line._pons_is_unselected_optional())" t-as="l">
+									<tr t-if="category.id==l.product_id.categ_id.id and l.display_type not in ['line_section', 'line_note']">
+										<td width="60%" style="text-align:left;margin:3px;"><span t-field="l.product_id.name" /></td>
+										<td width="10%" align="right"><span t-field="l.product_uom_qty" /></td>
+										<td width="15%" align="right"><span t-field="l.price_unit" /></td>
+										<td width="15%" align="right"><span t-field="l.price_subtotal" /></td>
+									</tr>
+								</t>
+							</t>
+							<tr>
+								<td width="60%" style="text-align:left;margin:3px;"><b>Costo totale (IVA escl.)</b></td>
+								<td width="10%" align="right" />
+								<td width="15%" align="right" />
+								<td width="15%" align="right"><span t-field="o.amount_untaxed" /></td>
+							</tr>
+							<t t-if="o.sconto_amount">
+								<tr style="font-size:14px;">
+									<td width="60%" style="text-align:left;margin:3px;">Ribasso</td>
+									<t t-if="o.sconto_dis_type == 'percent'">
+										<td width="10%" align="right"><span t-field="o.sconto_tax" />%</td>
+									</t>
+									<t t-if="o.sconto_dis_type == 'fixed'">
+										<td width="10%" align="right"><span t-field="o.sconto_tax" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+									</t>
+									<td width="15%" align="right" />
+									<td width="15%" align="right"><span t-field="o.sconto_amount" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+								</tr>
+								<tr>
+									<td width="60%" style="text-align:left;margin:3px;">Totale</td>
+									<td width="10%" align="right" />
+									<td width="15%" align="right" />
+									<td width="15%" align="right"><span t-field="o.after_sconto_amt" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+								</tr>
+							</t>
+							<t t-if="o.tw_disc_amt">
+								<tr style="font-size:14px;">
+									<td width="60%" style="text-align:left;margin:3px;">Sconto</td>
+									<t t-if="o.tw_dis_type == 'percent'">
+										<td width="10%" align="right"><span t-field="o.tw_disc" />%</td>
+									</t>
+									<t t-if="o.tw_dis_type == 'fixed'">
+										<td width="10%" align="right"><span t-field="o.tw_disc" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+									</t>
+									<td width="15%" align="right" />
+									<td width="15%" align="right"><span t-field="o.tw_disc_amt" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+								</tr>
+								<tr>
+									<td width="60%" style="text-align:left;margin:3px;">Totale</td>
+									<td width="10%" align="right" />
+									<td width="15%" align="right" />
+									<td width="15%" align="right"><span t-field="o.after_tw_amt" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+								</tr>
+							</t>
+							<tr>
+								<td width="60%" style="text-align:left;margin:3px;">IVA</td>
+								<td width="10%" align="right"><t t-if="o.so_taxes_id"><span t-field="o.so_taxes_id[0].name" /></t></td>
+								<td width="15%" align="right" />
+								<td width="15%" align="right"><span t-field="o.so_tax_after_discount" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+							</tr>
+							<tr>
+								<td width="60%" style="text-align:left;margin:3px;"><b>Totale</b></td>
+								<td width="10%" align="right" />
+								<td width="15%" align="right" />
+								<td width="15%" align="right"><span t-field="o.amount_total" /></td>
+							</tr>
+						</tbody>
+					</table>
+					<br />
+					<t t-if="o.order_line.filtered(lambda line: line._pons_is_unselected_optional() and not line.display_type)">
+						<table class="table table-bordered mt32" width="100%" style="page-break-before:always;">
+							<tbody>
+								<tr>
+									<td width="60%"><b>Prestazioni non comprese nell'offerta</b></td>
+									<td width="10%" />
+									<td width="15%" />
+									<td width="15%" />
+								</tr>
+								<t t-foreach="o.order_line.filtered(lambda line: line._pons_is_unselected_optional() and not line.display_type)" t-as="l">
+									<tr>
+										<td width="60%" style="text-align:left;margin:3px;"><span t-field="l.product_id.name" /></td>
+										<td width="10%" align="right"><span t-field="l.pons_optional_quantity" /></td>
+										<td width="15%" align="right"><span t-field="l.price_unit" /></td>
+										<td width="15%" align="right"><span t-out="l.price_unit * l.pons_optional_quantity" t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}" /></td>
+									</tr>
+								</t>
+							</tbody>
+						</table>
+					</t>
+				</div>
+			</div>
+		</t>
+    </template>
+
+	<template id="report_offerta_parziale">
+		<t t-call="web.html_container">
+			<t t-foreach="docs" t-as="doc">
+				<t t-call="tw_extend.report_offerta_parziale_doc" t-lang="doc.partner_id.lang" />
+			</t>
+		</t>
+	</template>
+
+	<record id="offerta_parziale_so_report" model="ir.actions.report">
+		<field name="name">Offerta parziale</field>
+		<field name="model">sale.order</field>
+		<field name="report_type">qweb-pdf</field>
+		<field name="report_name">tw_extend.report_offerta_parziale</field>
+
+		<field name="print_report_name">(object.name+'_'+object.client_order_ref)</field>
+		<field name="binding_model_id" ref="sale.model_sale_order" />
+		<field name="binding_type">report</field>
+	</record>
+
+
+</odoo>
