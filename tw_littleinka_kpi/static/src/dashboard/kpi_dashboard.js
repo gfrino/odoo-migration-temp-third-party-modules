@@ -1,4 +1,5 @@
 import { Component, onWillStart, proxy, useProps } from "@odoo/owl";
+import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -6,6 +7,16 @@ import { useSetupAction } from "@web/search/action_hook";
 import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 
 const MODEL = "tw.littleinka.kpi.dashboard";
+// Period and sedi stay as the user left them, also after leaving the dashboard (kept in the browser).
+const STORAGE_KEY = "tw_littleinka_kpi.filters";
+
+function readStoredFilters() {
+    try {
+        return JSON.parse(browser.localStorage.getItem(STORAGE_KEY) || "null") || {};
+    } catch {
+        return {};
+    }
+}
 
 /**
  * Little Inka KPI: one screen, made for the phone first.
@@ -30,8 +41,11 @@ export class LittleInkaKpiDashboard extends Component {
             { key: "year", label: _t("Anno") },
             { key: "custom", label: _t("Date…") },
         ];
-        // State saved in the URL and in the breadcrumb: flat strings only (see saveState).
-        const saved = this.props.state || this.props.action.params || {};
+        this.env.config?.setDisplayName?.(this.props.action.name || _t("Little Inka KPI"));
+        // State saved in the URL and in the breadcrumb: flat strings only (see saveState). Opened from
+        // the menu there is neither: the filters are the ones the user set last time, never a reset.
+        const params = this.props.action.params || {};
+        const saved = this.props.state || (params.period || params.sede ? params : readStoredFilters());
         const family = saved.family === "none" ? false : parseInt(saved.family) || null;
         this.state = proxy({
             params: {
@@ -57,6 +71,10 @@ export class LittleInkaKpiDashboard extends Component {
     async load() {
         this.state.loading = true;
         this.state.data = await this.orm.call(MODEL, "get_data", [this.state.params]);
+        if (this.state.data.sede_ids.length !== this.state.params.sede_ids.length) {
+            // A remembered sede no longer exists: the filter shows what the numbers really cover.
+            this.state.params.sede_ids = this.state.data.sede_ids;
+        }
         if (this.state.detailFamily !== null) {
             await this.loadDetail(this.state.detailFamily);
         }
@@ -66,7 +84,14 @@ export class LittleInkaKpiDashboard extends Component {
 
     /** Period, sedi and open family survive reloads and the breadcrumb (they go in the URL, as strings). */
     saveState() {
-        this.props.updateActionState?.(this.flatState());
+        const state = this.flatState();
+        this.props.updateActionState?.(state);
+        try {
+            const { period, sede, from, to } = state;
+            browser.localStorage.setItem(STORAGE_KEY, JSON.stringify({ period, sede, from, to }));
+        } catch {
+            // Private window or storage full: the filters still live in the URL.
+        }
     }
 
     flatState() {
@@ -171,6 +196,15 @@ export class LittleInkaKpiDashboard extends Component {
         return total ? Math.round((part / total) * 100) : 0;
     }
 
+    /** Share of what is on screen, so it follows the period and the sedi picked: «24%», «<1%». */
+    share(part, total) {
+        if (!(part > 0) || !(total > 0)) {
+            return "0%";
+        }
+        const value = (part / total) * 100;
+        return value < 1 ? "<1%" : `${Math.round(value)}%`;
+    }
+
     delta(now, before) {
         if (!before) {
             return null;
@@ -220,6 +254,18 @@ export class LittleInkaKpiDashboard extends Component {
 
     get maxSede() {
         return Math.max(1, ...(this.state.data?.by_sede || []).map((s) => s.amount));
+    }
+
+    get sediTotal() {
+        return (this.state.data?.by_sede || []).reduce((sum, s) => sum + s.amount, 0);
+    }
+
+    get detailSediTotal() {
+        return (this.state.detail?.sedi || []).reduce((sum, s) => sum + s.qty_online + s.qty_pos, 0);
+    }
+
+    get detailChannelsTotal() {
+        return (this.state.detail?.channels || []).reduce((sum, c) => sum + c.qty, 0);
     }
 
     get maxDay() {

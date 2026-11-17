@@ -68,7 +68,8 @@ class LittleInkaKpiDashboard(models.AbstractModel):
                 ids.add(int(value))
             except (TypeError, ValueError):
                 continue
-        return sorted(i for i in ids if i > 0)
+        # A sede remembered by the browser may have been archived or deleted since.
+        return sorted(self.env["tw.littleinka.kpi.sede"].search([("id", "in", [i for i in ids if i > 0])]).ids)
 
     def _where(self, alias, start, end, sede_ids):
         date_from, date_to = self._bounds(start, end)

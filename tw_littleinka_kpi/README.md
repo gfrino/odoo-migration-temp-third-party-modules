@@ -4,9 +4,14 @@ Vendite di tutte le sedi in un'unica dashboard Odoo 20, pensata prima per il tel
 pezzi per famiglia (Poké, Sushi, Bevande, Dessert…) divisi tra online e cassa,
 fatturato, ordini, scontrino medio, sito/app e sedi. Ogni riquadro apre i dettagli.
 
-In alto il periodo e le sedi: il pulsante «Sedi» apre un elenco con le spunte, per vedere una sede,
-alcune o tutte («Tutte le sedi» comprende anche le casse senza sede). Con più sedi a schermo c'è il
-confronto «Sedi».
+In alto il periodo e, a destra del titolo, le sedi: il pulsante apre un elenco con le spunte, per vedere
+una sede, alcune o tutte («Tutte le sedi» comprende anche le casse senza sede). Con più sedi a schermo
+c'è il confronto «Sedi». Canali e sedi mostrano la loro percentuale sul totale a schermo. Periodo e
+sedi restano come li ha lasciati l'utente: nell'indirizzo della pagina e, aprendo la dashboard dal menù,
+nella memoria del browser (`localStorage`, chiave `tw_littleinka_kpi.filters`).
+
+Stili: niente `min()`/`max()`/`clamp()` con unità miste negli `.scss`, il compilatore Sass di Odoo li
+rifiuta e la grafica di tutto il backend torna a quella vecchia.
 
 ## Da dove arrivano i dati
 

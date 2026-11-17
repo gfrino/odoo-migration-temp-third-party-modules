@@ -61,12 +61,15 @@ $li-kpi-colors: (
         flex-wrap: wrap;
         .form-control { min-height: 36px; width: auto; }
     }
+    // Top right, on the row of the title: the header stays low on a phone too.
     .o_li_kpi_sedi_btn {
         display: inline-flex;
         align-items: center;
         gap: 6px;
+        flex: none;
         min-height: 36px;
-        max-width: 100%;
+        // Plain values only: Odoo's Sass compiler refuses min() with mixed units.
+        max-width: 55%;
         border-radius: 999px;
         white-space: nowrap;
     }
@@ -246,6 +249,8 @@ $li-kpi-colors: (
         font-variant-numeric: tabular-nums;
     }
     .o_li_kpi_row_foot { font-size: .8rem; }
+    // Share of the total on screen, next to the name of the channel or of the sede.
+    .o_li_kpi_share { margin-left: 4px; font-weight: 600; color: var(--li-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
     .o_li_kpi_bar {
         display: flex;
         width: 100%;

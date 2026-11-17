@@ -15,28 +15,9 @@
                                 <t t-if="this.state.detail" t-out="this.state.detail.family.name"/>
                                 <t t-else="">Vendite</t>
                             </h1>
-                            <div class="o_li_kpi_sub text-muted text-truncate">
-                                <t t-out="this.sedeName"/> · <t t-out="this.periodLabel"/>
-                            </div>
+                            <div class="o_li_kpi_sub text-muted text-truncate" t-out="this.periodLabel"/>
                         </div>
                         <i t-if="this.state.loading" class="oi oi-spin text-muted" data-icon="progress_activity" aria-hidden="true"/>
-                    </div>
-                    <div class="o_li_kpi_chips" role="group" aria-label="Periodo">
-                        <t t-foreach="this.periods" t-as="period" t-key="period.key">
-                            <button type="button" class="btn btn-sm"
-                                    t-att-class="period.key === this.state.params.period ? 'btn-primary' : 'btn-light'"
-                                    t-on-click="() => this.setPeriod(period.key)" t-out="period.label"/>
-                        </t>
-                    </div>
-                    <div class="o_li_kpi_filters">
-                        <t t-if="this.state.params.period === 'custom'">
-                            <label class="visually-hidden" for="li_kpi_from">Dal</label>
-                            <input id="li_kpi_from" type="date" class="form-control form-control-sm"
-                                   t-att-value="this.state.params.date_from" t-on-change="(ev) => this.onDate('date_from', ev)"/>
-                            <label class="visually-hidden" for="li_kpi_to">Al</label>
-                            <input id="li_kpi_to" type="date" class="form-control form-control-sm"
-                                   t-att-value="this.state.params.date_to" t-on-change="(ev) => this.onDate('date_to', ev)"/>
-                        </t>
                         <!-- Sedi: una, alcune o tutte. L'elenco resta aperto mentre si spunta. -->
                         <button type="button" class="btn btn-sm o_li_kpi_sedi_btn"
                                 t-att-class="this.state.params.sede_ids.length ? 'btn-primary' : 'btn-light'"
@@ -63,6 +44,21 @@
                             </button>
                         </t>
                         <button type="button" class="btn btn-sm btn-light o_li_kpi_sedi_done" t-on-click="() => this.state.sediOpen = false">Fatto</button>
+                    </div>
+                    <div class="o_li_kpi_chips" role="group" aria-label="Periodo">
+                        <t t-foreach="this.periods" t-as="period" t-key="period.key">
+                            <button type="button" class="btn btn-sm"
+                                    t-att-class="period.key === this.state.params.period ? 'btn-primary' : 'btn-light'"
+                                    t-on-click="() => this.setPeriod(period.key)" t-out="period.label"/>
+                        </t>
+                    </div>
+                    <div t-if="this.state.params.period === 'custom'" class="o_li_kpi_filters">
+                        <label class="visually-hidden" for="li_kpi_from">Dal</label>
+                        <input id="li_kpi_from" type="date" class="form-control form-control-sm"
+                               t-att-value="this.state.params.date_from" t-on-change="(ev) => this.onDate('date_from', ev)"/>
+                        <label class="visually-hidden" for="li_kpi_to">Al</label>
+                        <input id="li_kpi_to" type="date" class="form-control form-control-sm"
+                               t-att-value="this.state.params.date_to" t-on-change="(ev) => this.onDate('date_to', ev)"/>
                     </div>
                 </header>
 
@@ -141,7 +137,7 @@
                 <t t-foreach="data.channels" t-as="channel" t-key="channel.key">
                     <button type="button" class="o_li_kpi_row" t-on-click="() => this.openSales([['channel', '=', channel.key]], channel.label, ['date:day'])">
                         <span class="o_li_kpi_row_head">
-                            <span t-out="channel.label"/>
+                            <span><t t-out="channel.label"/> <span class="o_li_kpi_share" t-out="this.share(channel.amount, totals.amount)"/></span>
                             <span><strong t-out="this.money(channel.amount)"/> <span class="text-muted">· <t t-out="channel.orders"/></span></span>
                         </span>
                         <span class="o_li_kpi_bar"><span t-att-class="channel.key === 'pos' ? 'o_li_kpi_bar_pos' : 'o_li_kpi_bar_online'" t-att-style="'width:' + this.pct(channel.amount, this.maxChannel) + '%'"/></span>
@@ -157,7 +153,7 @@
                 <t t-foreach="data.by_sede" t-as="sede" t-key="sede.id or 'none'">
                     <button type="button" class="o_li_kpi_row" t-on-click="() => this.pickSede(sede.id)" t-att-disabled="!sede.id">
                         <span class="o_li_kpi_row_head">
-                            <span t-out="sede.name"/>
+                            <span><t t-out="sede.name"/> <span class="o_li_kpi_share" t-out="this.share(sede.amount, this.sediTotal)"/></span>
                             <strong t-out="this.money(sede.amount)"/>
                         </span>
                         <span class="o_li_kpi_bar o_li_kpi_bar_split">
@@ -233,7 +229,7 @@
                 <t t-foreach="detail.sedi" t-as="sede" t-key="sede.id or 'none'">
                     <div class="o_li_kpi_row">
                         <span class="o_li_kpi_row_head">
-                            <span t-out="sede.name"/>
+                            <span><t t-out="sede.name"/> <span class="o_li_kpi_share" t-out="this.share(sede.qty_online + sede.qty_pos, this.detailSediTotal)"/></span>
                             <strong t-out="this.qty(sede.qty_online + sede.qty_pos)"/>
                         </span>
                         <span class="o_li_kpi_bar o_li_kpi_bar_split">
@@ -254,7 +250,7 @@
             <div class="o_li_kpi_card o_li_kpi_list">
                 <t t-foreach="detail.channels" t-as="channel" t-key="channel.key">
                     <div class="o_li_kpi_row o_li_kpi_row_inline">
-                        <span t-out="channel.label"/>
+                        <span><t t-out="channel.label"/> <span class="o_li_kpi_share" t-out="this.share(channel.qty, this.detailChannelsTotal)"/></span>
                         <strong t-out="this.qty(channel.qty)"/>
                     </div>
                 </t>
