@@ -22,4 +22,5 @@
     <menuitem id="menu_kpi_sede" name="Sedi" parent="menu_kpi_config" sequence="1" action="action_kpi_sede"/>
     <menuitem id="menu_kpi_family" name="Famiglie di prodotti" parent="menu_kpi_config" sequence="2" action="action_kpi_family"/>
     <menuitem id="menu_kpi_category" name="Categorie" parent="menu_kpi_config" sequence="3" action="action_kpi_category"/>
+    <menuitem id="menu_kpi_product" name="Prodotti con famiglia propria" parent="menu_kpi_config" sequence="4" action="action_kpi_product"/>
 </odoo>

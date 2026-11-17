@@ -16,8 +16,12 @@ Version History
 * 20.0.1.0.0: prima versione (sedi con chiave, ricezione ordini, famiglie e categorie,
   analisi vendite e prodotti, dashboard per telefono e computer).
 * 20.0.1.0.1: tolto il canale «Telefono»: gli ordini al telefono si battono in cassa.
+* 20.0.1.1.0: le aggiunte (extra) restano nella loro famiglia ma non contano nei pezzi; famiglia
+  «Accessori» che raccoglie le categorie non riconosciute, così niente resta «Da assegnare»;
+  prodotti con famiglia propria (sacchetti e posate venduti dal tasto «Extras»); una categoria
+  nuova della cassa prende la famiglia della categoria madre.
 """,
-    "version": "20.0.1.0.1",
+    "version": "20.0.1.1.0",
     "category": "Sales/Point of Sale",
     "author": "ticinoWEB",
     "website": "https://www.ticinoweb.com",

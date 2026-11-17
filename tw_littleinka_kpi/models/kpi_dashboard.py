@@ -196,8 +196,20 @@ class LittleInkaKpiDashboard(models.AbstractModel):
                       "COALESCE(sum(r.amount_total), 0) AS amount")
         products = self._rows(SQL(
             "SELECT r.product_name AS name, %s FROM tw_littleinka_kpi_report_line r WHERE %s AND %s "
-            "GROUP BY r.product_name ORDER BY sum(r.quantity) DESC NULLS LAST, r.product_name LIMIT 40",
+            "GROUP BY r.product_name HAVING COALESCE(sum(r.extra_quantity), 0) = 0 "
+            "ORDER BY sum(r.quantity) DESC NULLS LAST, r.product_name LIMIT 40",
             sql_qty, where, family,
+        ))
+        # Additions (extra topping, extra protein…): sold with a piece, never counted as one.
+        extras = self._rows(SQL(
+            "SELECT r.product_name AS name, "
+            "COALESCE(sum(r.extra_quantity) FILTER (WHERE r.sales_type = 'online'), 0) AS qty_online, "
+            "COALESCE(sum(r.extra_quantity) FILTER (WHERE r.sales_type = 'pos'), 0) AS qty_pos, "
+            "COALESCE(sum(r.amount_total), 0) AS amount "
+            "FROM tw_littleinka_kpi_report_line r WHERE %s AND %s "
+            "GROUP BY r.product_name HAVING COALESCE(sum(r.extra_quantity), 0) <> 0 "
+            "ORDER BY sum(r.extra_quantity) DESC, r.product_name LIMIT 40",
+            where, family,
         ))
         sedi = self._rows(SQL(
             "SELECT r.sede_id AS id, %s FROM tw_littleinka_kpi_report_line r WHERE %s AND %s GROUP BY r.sede_id",
@@ -225,6 +237,7 @@ class LittleInkaKpiDashboard(models.AbstractModel):
         return {
             "family": {"id": family_id or False, "name": record.name if record else self.env._("Da assegnare")},
             "products": products,
+            "extras": extras,
             "sedi": sedi,
             "channels": sorted(channels, key=lambda row: -row["qty"]),
             "days": days,

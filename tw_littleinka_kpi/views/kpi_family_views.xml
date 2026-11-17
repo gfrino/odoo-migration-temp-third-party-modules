@@ -8,6 +8,7 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="keywords" placeholder="es. poke, poké, bowl"/>
+                <field name="is_fallback" widget="boolean_toggle"/>
                 <field name="color" widget="color_picker"/>
                 <field name="category_count"/>
                 <field name="active" column_invisible="True"/>
@@ -35,6 +36,7 @@
                 </header>
                 <field name="name" readonly="True"/>
                 <field name="family_id" options="{'no_create': True}"/>
+                <field name="count_pieces" widget="boolean_toggle"/>
                 <field name="source"/>
             </list>
         </field>
@@ -66,6 +68,29 @@
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Nessuna categoria da assegnare</p>
             <p>Le categorie del sito e della cassa compaiono qui da sole: scegli per ognuna la famiglia in cui contarla.</p>
+        </field>
+    </record>
+
+    <record id="view_kpi_product_list" model="ir.ui.view">
+        <field name="name">tw.littleinka.kpi.product.list</field>
+        <field name="model">tw.littleinka.kpi.product</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="product_tmpl_id" options="{'no_create': True, 'no_open': True}"/>
+                <field name="family_id" options="{'no_create': True, 'no_open': True}"/>
+                <field name="count_pieces" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_kpi_product" model="ir.actions.act_window">
+        <field name="name">Prodotti con famiglia propria</field>
+        <field name="res_model">tw.littleinka.kpi.product</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Tutti i prodotti seguono la loro categoria</p>
+            <p>Aggiungi qui un prodotto della cassa che va contato in un'altra famiglia rispetto alla sua categoria,
+               per esempio i sacchetti venduti dal tasto «Extras».</p>
         </field>
     </record>
 </odoo>

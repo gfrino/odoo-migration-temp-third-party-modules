@@ -108,6 +108,61 @@ class TestLittleInkaKpi(HttpCase):
         # The analysis views read the same data.
         self.assertEqual(self.env["tw.littleinka.kpi.report"].search_count([("sede_id", "=", self.sede.id)]), 1)
 
+    def test_additions_and_fallback(self):
+        categories = self.env["tw.littleinka.kpi.category"]
+        poke = self.env.ref("tw_littleinka_kpi.family_poke")
+        accessories = self.env.ref("tw_littleinka_kpi.family_accessories")
+        self.assertTrue(accessories.is_fallback)
+
+        # One poké with an extra topping is one piece; a category nobody knows goes to «Accessori».
+        order = _order(201, 30.0)
+        order["lines"] += [
+            {"product_id": 11, "variation_id": 0, "sku": "", "name": "Topping in più", "category": "Poké Extra",
+             "quantity": 3, "total": "1.50", "total_tax": "0.00"},
+            {"product_id": 12, "variation_id": 0, "sku": "", "name": "Cosa nuova", "category": "Categoria mai vista",
+             "quantity": 1, "total": "2.00", "total_tax": "0.00"},
+        ]
+        self.assertEqual(self._post("orders", {"orders": [order]}).status_code, 200)
+        extra = categories.search([("key", "=", "poke extra")])
+        self.assertEqual(extra.family_id, poke)
+        self.assertFalse(extra.count_pieces)
+        self.assertEqual(categories.search([("key", "=", "categoria mai vista")]).family_id, accessories)
+        self.assertFalse(categories.search_count([("family_id", "=", False)]))
+
+        params = {"period": "custom", "date_from": "2026-11-12", "date_to": "2026-11-12", "sede_id": self.sede.id}
+        dashboard = self.env["tw.littleinka.kpi.dashboard"]
+        families = {f["id"]: f for f in dashboard.get_data(params)["families"]}
+        self.assertEqual(families[poke.id]["qty_online"], 2)
+        self.assertEqual(families[accessories.id]["qty_online"], 1)
+        self.assertNotIn(False, families)
+        detail = dashboard.get_family_detail(params, poke.id)
+        self.assertEqual([p["name"] for p in detail["products"]], ["Test bowl"])
+        self.assertEqual([(e["name"], e["qty_online"]) for e in detail["extras"]], [("Topping in più", 3)])
+
+    def test_pos_categories_and_product_rules(self):
+        categories = self.env["tw.littleinka.kpi.category"]
+        poke = self.env.ref("tw_littleinka_kpi.family_poke")
+        accessories = self.env.ref("tw_littleinka_kpi.family_accessories")
+        parent = self.env["pos.category"].create({"name": "Crea la tua Poke test"})
+        self.env["pos.category"].create({"name": "Taglia XXL test", "parent_id": parent.id})
+        extras = self.env["pos.category"].create({"name": "Extras test"})
+        products = self.env["product.template"].create([
+            {"name": "Topping Extra test", "available_in_pos": True, "pos_categ_ids": [(6, 0, extras.ids)]},
+            {"name": "Sacchetti piccoli test", "available_in_pos": True, "pos_categ_ids": [(6, 0, extras.ids)]},
+        ])
+        categories._refresh_pos()
+        # The size takes the family of its parent category; the additions category does not count pieces.
+        self.assertEqual(categories.search([("key", "=", "taglia xxl test")]).family_id, poke)
+        extras_category = categories.search([("key", "=", "extras test")])
+        self.assertFalse(extras_category.count_pieces)
+        extras_category.family_id = poke
+        categories._refresh_pos()
+        rules = self.env["tw.littleinka.kpi.product"].search([("product_tmpl_id", "in", products.ids)])
+        self.assertEqual(rules.product_tmpl_id.name, "Sacchetti piccoli test")
+        self.assertEqual(rules.family_id, accessories)
+        with self.assertRaises(Exception):
+            poke.is_fallback = True
+
     def test_invalid_payloads(self):
         self.assertEqual(self._post("orders", {"orders": "nope"}).status_code, 400)
         self.assertEqual(self._post("orders", {"orders": [_order(1, 1.0)] * 101}).status_code, 413)

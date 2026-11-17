@@ -76,7 +76,7 @@ class LittleInkaKpiReport(models.Model):
 
 
 class LittleInkaKpiReportLine(models.Model):
-    """One row per product sold, with its family (through the category table)."""
+    """One row per product sold, with its family (through the category table, or the product's own rule)."""
 
     _name = "tw.littleinka.kpi.report.line"
     _description = "Little Inka KPI: prodotti venduti"
@@ -93,6 +93,10 @@ class LittleInkaKpiReportLine(models.Model):
     category_name = fields.Char("Categoria", readonly=True)
     product_name = fields.Char("Prodotto", readonly=True)
     quantity = fields.Float("Pezzi", readonly=True, aggregator="sum")
+    extra_quantity = fields.Float(
+        "Aggiunte", readonly=True, aggregator="sum",
+        help="Quantità delle aggiunte (extra, supplementi): non contano nei pezzi.",
+    )
     amount_total = fields.Monetary("Fatturato (IVA incl.)", readonly=True, aggregator="sum")
 
     def _query(self):
@@ -101,17 +105,22 @@ class LittleInkaKpiReportLine(models.Model):
             SELECT l.id * 2 AS id, o.date_order AS date, o.sede_id, o.company_id,
                    'online' AS sales_type, o.channel, c.family_id,
                    COALESCE(c.name, l.category_name) AS category_name, l.name AS product_name,
-                   l.quantity, l.amount_total
+                   CASE WHEN c.count_pieces IS FALSE THEN 0 ELSE l.quantity END AS quantity,
+                   CASE WHEN c.count_pieces IS FALSE THEN l.quantity ELSE 0 END AS extra_quantity,
+                   l.amount_total
               FROM tw_littleinka_kpi_order_line l
               JOIN tw_littleinka_kpi_order o ON o.id = l.order_id
               LEFT JOIN tw_littleinka_kpi_category c ON c.key = l.category_key
              WHERE o.is_counted
             UNION ALL
             SELECT pl.id * 2 + 1, po.date_order, rel.sede_id, po.company_id,
-                   'pos', 'pos', COALESCE(pcat.family_id, ccat.family_id),
+                   'pos', 'pos', COALESCE(prule.family_id, pcat.family_id, ccat.family_id),
                    COALESCE(pcat.name, ccat.name),
                    COALESCE(pt.name->>%(lang)s, pt.name->>'en_US'),
                    CASE WHEN EXISTS (SELECT 1 FROM pos_order_line ch WHERE ch.combo_parent_id = pl.id)
+                             OR NOT COALESCE(prule.count_pieces, pcat.count_pieces, ccat.count_pieces, TRUE)
+                        THEN 0 ELSE pl.qty END,
+                   CASE WHEN COALESCE(prule.count_pieces, pcat.count_pieces, ccat.count_pieces, TRUE)
                         THEN 0 ELSE pl.qty END,
                    pl.price_subtotal_incl
               FROM pos_order_line pl
@@ -119,8 +128,9 @@ class LittleInkaKpiReportLine(models.Model):
               JOIN product_product pp ON pp.id = pl.product_id
               JOIN product_template pt ON pt.id = pp.product_tmpl_id
               LEFT JOIN tw_littleinka_kpi_sede_pos_config_rel rel ON rel.pos_config_id = po.config_id
+              LEFT JOIN tw_littleinka_kpi_product prule ON prule.product_tmpl_id = pt.id
               LEFT JOIN LATERAL (
-                    SELECT c.family_id, c.name
+                    SELECT c.family_id, c.name, c.count_pieces
                       FROM pos_category_product_template_rel r
                       JOIN tw_littleinka_kpi_category_pos_rel cr ON cr.pos_category_id = r.pos_category_id
                       JOIN tw_littleinka_kpi_category c ON c.id = cr.kpi_category_id
@@ -128,7 +138,7 @@ class LittleInkaKpiReportLine(models.Model):
                      ORDER BY c.family_id IS NULL, r.pos_category_id
                      LIMIT 1) pcat ON TRUE
               LEFT JOIN LATERAL (
-                    SELECT c.family_id, c.name
+                    SELECT c.family_id, c.name, c.count_pieces
                       FROM tw_littleinka_kpi_category_product_rel cr
                       JOIN tw_littleinka_kpi_category c ON c.id = cr.kpi_category_id
                      WHERE cr.product_category_id = pt.categ_id

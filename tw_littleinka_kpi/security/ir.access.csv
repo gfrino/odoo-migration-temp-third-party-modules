@@ -5,6 +5,8 @@ access_kpi_family_user,KPI family user,tw.littleinka.kpi.family,group_kpi_user,r
 access_kpi_family_manager,KPI family manager,tw.littleinka.kpi.family,group_kpi_manager,crud,
 access_kpi_category_user,KPI category user,tw.littleinka.kpi.category,group_kpi_user,r,
 access_kpi_category_manager,KPI category manager,tw.littleinka.kpi.category,group_kpi_manager,crud,
+access_kpi_product_user,KPI product user,tw.littleinka.kpi.product,group_kpi_user,r,
+access_kpi_product_manager,KPI product manager,tw.littleinka.kpi.product,group_kpi_manager,crud,
 access_kpi_order_user,KPI order user,tw.littleinka.kpi.order,group_kpi_user,r,
 access_kpi_order_manager,KPI order manager,tw.littleinka.kpi.order,group_kpi_manager,rd,
 access_kpi_order_line_user,KPI order line user,tw.littleinka.kpi.order.line,group_kpi_user,r,

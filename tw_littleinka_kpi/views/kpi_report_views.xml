@@ -137,6 +137,7 @@
             <list create="false">
                 <field name="product_name"/>
                 <field name="quantity" sum="Pezzi"/>
+                <field name="extra_quantity" sum="Aggiunte" optional="hide"/>
                 <field name="currency_id" column_invisible="True"/>
                 <field name="amount_total" sum="Fatturato"/>
                 <field name="sales_type"/>

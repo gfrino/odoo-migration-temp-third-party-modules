@@ -246,6 +246,7 @@ $li-kpi-colors: (
     .o_li_kpi_product_name { overflow-wrap: anywhere; }
     .o_li_kpi_product_qty { text-align: right; font-variant-numeric: tabular-nums; }
     .o_li_kpi_product_split { grid-column: 1 / -1; font-size: .8rem; }
+    .o_li_kpi_note { font-size: .8rem; margin: -4px 0 8px; }
 
     .o_li_kpi_more {
         display: flex;

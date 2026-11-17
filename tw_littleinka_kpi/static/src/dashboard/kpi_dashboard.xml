@@ -258,6 +258,22 @@
             </div>
         </section>
 
+        <section t-if="detail.extras.length" class="o_li_kpi_section">
+            <h2 class="o_li_kpi_h2">Aggiunte</h2>
+            <p class="o_li_kpi_note text-muted">Non contano nei pezzi: il pezzo è il prodotto a cui si aggiungono.</p>
+            <div class="o_li_kpi_card o_li_kpi_list">
+                <t t-foreach="detail.extras" t-as="extra" t-key="extra_index">
+                    <div class="o_li_kpi_product">
+                        <span class="o_li_kpi_product_name" t-out="extra.name"/>
+                        <span class="o_li_kpi_product_qty"><strong t-out="this.qty(extra.qty_online + extra.qty_pos)"/></span>
+                        <span class="o_li_kpi_product_split text-muted">
+                            Online <t t-out="this.qty(extra.qty_online)"/> · Cassa <t t-out="this.qty(extra.qty_pos)"/> · <t t-out="this.money(extra.amount)"/>
+                        </span>
+                    </div>
+                </t>
+            </div>
+        </section>
+
         <div class="o_li_kpi_more">
             <button type="button" class="btn btn-light" t-on-click="() => this.openFamilyProducts()">
                 <i class="oi" data-icon="table_chart" aria-hidden="true"/> Apri in tabella

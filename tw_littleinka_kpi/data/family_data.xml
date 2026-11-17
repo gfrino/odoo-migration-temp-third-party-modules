@@ -25,4 +25,12 @@
         <field name="color">9</field>
         <field name="keywords">dessert, dolc, mochi, gelat</field>
     </record>
+    <!-- Sacchetti, posate e tutto ciò che nessuna parola chiave riconosce: niente resta «Da assegnare». -->
+    <record id="family_accessories" model="tw.littleinka.kpi.family">
+        <field name="name">Accessori</field>
+        <field name="sequence">5</field>
+        <field name="color">8</field>
+        <field name="keywords">accessori, posate, sacchett, vario, varie, miscellaneous, servizi, office</field>
+        <field name="is_fallback" eval="True"/>
+    </record>
 </odoo>
