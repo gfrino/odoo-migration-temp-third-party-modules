@@ -97,6 +97,18 @@ class TestLittleInkaKpi(HttpCase):
         data = dashboard.get_data({"period": "custom", "date_from": "2026-11-12", "date_to": "2026-11-12", "sede_id": self.sede.id})
         self.assertAlmostEqual(data["totals"]["amount_online"], 20.0)
         self.assertEqual([channel["key"] for channel in data["channels"]], ["web", "app", "pos"])
+
+        # The filter takes several sedi: the comparison «Per sede» shows the chosen ones only.
+        other = self.env["tw.littleinka.kpi.sede"].create({"name": "Seconda sede"})
+        third = self.env["tw.littleinka.kpi.sede"].create({"name": "Terza sede"})
+        day = {"period": "custom", "date_from": "2026-11-12", "date_to": "2026-11-12"}
+        both = dashboard.get_data(dict(day, sede_ids=[self.sede.id, other.id]))
+        self.assertEqual(both["sede_ids"], sorted([self.sede.id, other.id]))
+        self.assertAlmostEqual(both["totals"]["amount_online"], 20.0)
+        self.assertEqual({row["id"] for row in both["by_sede"]}, {self.sede.id, other.id})
+        self.assertAlmostEqual(dashboard.get_data(dict(day, sede_ids=[other.id, third.id]))["totals"]["amount_online"], 0.0)
+        self.assertEqual(dashboard.get_data(dict(day, sede_ids=[self.sede.id]))["by_sede"], [])
+        self.assertEqual(dashboard.get_data(dict(day, sede_ids=["x", None]))["sede_ids"], [])
         self.assertEqual(data["totals"]["orders_online"], 1)
         poke = next(f for f in data["families"] if f["id"] == category.family_id.id)
         self.assertEqual(poke["qty_online"], 2)

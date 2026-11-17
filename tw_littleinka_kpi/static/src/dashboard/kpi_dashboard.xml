@@ -37,13 +37,32 @@
                             <input id="li_kpi_to" type="date" class="form-control form-control-sm"
                                    t-att-value="this.state.params.date_to" t-on-change="(ev) => this.onDate('date_to', ev)"/>
                         </t>
-                        <label class="visually-hidden" for="li_kpi_sede">Sede</label>
-                        <select id="li_kpi_sede" class="form-select form-select-sm" t-on-change="(ev) => this.onSede(ev)">
-                            <option value="" t-att-selected="!this.state.params.sede_id">Tutte le sedi</option>
-                            <t t-foreach="this.state.data?.sedi || []" t-as="sede" t-key="sede.id">
-                                <option t-att-value="sede.id" t-att-selected="sede.id === this.state.params.sede_id" t-out="sede.name"/>
-                            </t>
-                        </select>
+                        <!-- Sedi: una, alcune o tutte. L'elenco resta aperto mentre si spunta. -->
+                        <button type="button" class="btn btn-sm o_li_kpi_sedi_btn"
+                                t-att-class="this.state.params.sede_ids.length ? 'btn-primary' : 'btn-light'"
+                                t-att-aria-expanded="this.state.sediOpen ? 'true' : 'false'" aria-controls="li_kpi_sedi"
+                                t-on-click="() => this.state.sediOpen = !this.state.sediOpen">
+                            <i class="oi" data-icon="storefront" aria-hidden="true"/>
+                            <span class="text-truncate" t-out="this.sedeName"/>
+                            <i class="oi" t-att-data-icon="this.state.sediOpen ? 'expand_less' : 'expand_more'" aria-hidden="true"/>
+                        </button>
+                    </div>
+                    <div t-if="this.state.sediOpen" id="li_kpi_sedi" class="o_li_kpi_sedi" role="group" aria-label="Sedi da mostrare">
+                        <button type="button" class="o_li_kpi_check" role="checkbox"
+                                t-att-aria-checked="this.state.params.sede_ids.length ? 'false' : 'true'"
+                                t-on-click="() => this.allSedi()">
+                            <span class="o_li_kpi_box" aria-hidden="true"/>
+                            <span>Tutte le sedi</span>
+                        </button>
+                        <t t-foreach="this.state.data?.sedi || []" t-as="sede" t-key="sede.id">
+                            <button type="button" class="o_li_kpi_check" role="checkbox"
+                                    t-att-aria-checked="this.isSedeSelected(sede.id) ? 'true' : 'false'"
+                                    t-on-click="() => this.toggleSede(sede.id)">
+                                <span class="o_li_kpi_box" aria-hidden="true"/>
+                                <span t-out="sede.name"/>
+                            </button>
+                        </t>
+                        <button type="button" class="btn btn-sm btn-light o_li_kpi_sedi_done" t-on-click="() => this.state.sediOpen = false">Fatto</button>
                     </div>
                 </header>
 

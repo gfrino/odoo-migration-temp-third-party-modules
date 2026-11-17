@@ -56,15 +56,29 @@ class LittleInkaKpiDashboard(models.AbstractModel):
     def _bounds(self, start, end):
         return self._utc(start), self._utc(end + timedelta(days=1))
 
-    def _where(self, alias, start, end, sede_id):
+    @api.model
+    def _sede_ids(self, params):
+        """The sedi picked in the filter, as a clean list of ids; empty = every sede (and the tills without one)."""
+        raw = params.get("sede_ids") or params.get("sede_id") or []
+        if not isinstance(raw, (list, tuple)):
+            raw = [raw]
+        ids = set()
+        for value in raw:
+            try:
+                ids.add(int(value))
+            except (TypeError, ValueError):
+                continue
+        return sorted(i for i in ids if i > 0)
+
+    def _where(self, alias, start, end, sede_ids):
         date_from, date_to = self._bounds(start, end)
         clauses = [
             SQL("%s.date >= %s", SQL.identifier(alias), date_from),
             SQL("%s.date < %s", SQL.identifier(alias), date_to),
             SQL("(%s.company_id IS NULL OR %s.company_id = ANY(%s))", SQL.identifier(alias), SQL.identifier(alias), self.env.companies.ids),
         ]
-        if sede_id:
-            clauses.append(SQL("%s.sede_id = %s", SQL.identifier(alias), int(sede_id)))
+        if sede_ids:
+            clauses.append(SQL("%s.sede_id = ANY(%s)", SQL.identifier(alias), list(sede_ids)))
         return SQL(" AND ").join(clauses)
 
     def _rows(self, query):
@@ -77,12 +91,12 @@ class LittleInkaKpiDashboard(models.AbstractModel):
 
     # ------------------------------------------------------------------ data
 
-    def _totals(self, start, end, sede_id):
+    def _totals(self, start, end, sede_ids):
         rows = self._rows(SQL(
             """SELECT sales_type, channel, COALESCE(sum(amount_total), 0) AS amount,
                       COALESCE(sum(order_count), 0) AS orders, COALESCE(sum(item_count), 0) AS items
                  FROM tw_littleinka_kpi_report r WHERE %s GROUP BY sales_type, channel""",
-            self._where("r", start, end, sede_id),
+            self._where("r", start, end, sede_ids),
         ))
         totals = {"amount": 0.0, "amount_online": 0.0, "amount_pos": 0.0, "orders": 0, "orders_online": 0, "orders_pos": 0, "items": 0.0}
         channels = {key: {"key": key, "amount": 0.0, "orders": 0} for key, _label in CHANNELS}
@@ -100,11 +114,11 @@ class LittleInkaKpiDashboard(models.AbstractModel):
         labels = dict(CHANNELS)
         return totals, [dict(ch, label=labels[ch["key"]]) for ch in channels.values()]
 
-    def _families(self, start, end, sede_id):
+    def _families(self, start, end, sede_ids):
         rows = self._rows(SQL(
             """SELECT family_id, sales_type, COALESCE(sum(quantity), 0) AS qty, COALESCE(sum(amount_total), 0) AS amount
                  FROM tw_littleinka_kpi_report_line r WHERE %s GROUP BY family_id, sales_type""",
-            self._where("r", start, end, sede_id),
+            self._where("r", start, end, sede_ids),
         ))
         families = self.env["tw.littleinka.kpi.family"].search([])
         result = {
@@ -126,14 +140,14 @@ class LittleInkaKpiDashboard(models.AbstractModel):
             out.append(unassigned)
         return out
 
-    def _by_sede(self, start, end):
+    def _by_sede(self, start, end, sede_ids):
         rows = self._rows(SQL(
             """SELECT sede_id, sales_type, COALESCE(sum(amount_total), 0) AS amount, COALESCE(sum(order_count), 0) AS orders
                  FROM tw_littleinka_kpi_report r WHERE %s GROUP BY sede_id, sales_type""",
-            self._where("r", start, end, False),
+            self._where("r", start, end, sede_ids),
         ))
         sedi = {s.id: {"id": s.id, "name": s.name, "amount_online": 0.0, "amount_pos": 0.0, "orders_online": 0, "orders_pos": 0}
-                for s in self.env["tw.littleinka.kpi.sede"].search([])}
+                for s in self.env["tw.littleinka.kpi.sede"].search([("id", "in", sede_ids)] if sede_ids else [])}
         other = {"id": False, "name": self.env._("Casse senza sede"), "amount_online": 0.0, "amount_pos": 0.0, "orders_online": 0, "orders_pos": 0}
         for row in rows:
             target = sedi.get(row["sede_id"], other)
@@ -153,13 +167,13 @@ class LittleInkaKpiDashboard(models.AbstractModel):
         params = params or {}
         self.env["tw.littleinka.kpi.category"].sudo()._refresh_pos()
         period, start, end = self._range(params)
-        sede_id = params.get("sede_id") or False
+        sede_ids = self._sede_ids(params)
         prev_end = start - timedelta(days=1)
         prev_start = prev_end - (end - start)
-        totals, channels = self._totals(start, end, sede_id)
-        prev_totals, _channels = self._totals(prev_start, prev_end, sede_id)
-        families = self._families(start, end, sede_id)
-        prev_families = {f["id"]: f for f in self._families(prev_start, prev_end, sede_id)}
+        totals, channels = self._totals(start, end, sede_ids)
+        prev_totals, _channels = self._totals(prev_start, prev_end, sede_ids)
+        families = self._families(start, end, sede_ids)
+        prev_families = {f["id"]: f for f in self._families(prev_start, prev_end, sede_ids)}
         for family in families:
             family["prev_qty"] = prev_families.get(family["id"], {}).get("qty", 0.0)
         date_from, date_to = self._bounds(start, end)
@@ -170,26 +184,26 @@ class LittleInkaKpiDashboard(models.AbstractModel):
             "date_to": fields.Date.to_string(end),
             "utc_from": fields.Datetime.to_string(date_from),
             "utc_to": fields.Datetime.to_string(date_to),
-            "sede_id": sede_id,
+            "sede_ids": sede_ids,
             "sedi": [{"id": s.id, "name": s.name} for s in self.env["tw.littleinka.kpi.sede"].search([])],
             "currency": {"symbol": currency.symbol, "position": currency.position, "digits": currency.decimal_places},
             "totals": totals,
             "prev_totals": prev_totals,
             "channels": channels,
             "families": families,
-            "by_sede": self._by_sede(start, end) if not sede_id else [],
+            # Comparing sedi only makes sense with more than one of them on screen.
+            "by_sede": self._by_sede(start, end, sede_ids) if len(sede_ids) != 1 else [],
             "unassigned_categories": self.env["tw.littleinka.kpi.category"].search_count([("family_id", "=", False)]),
             "is_manager": self.env.user.has_group("tw_littleinka_kpi.group_kpi_manager"),
         }
 
     @api.model
     def get_family_detail(self, params=None, family_id=False):
-        """Details of one family (or of the products without family) for the selected period and sede."""
+        """Details of one family (or of the products without family) for the selected period and sedi."""
         self._check()
         params = params or {}
         _period, start, end = self._range(params)
-        sede_id = params.get("sede_id") or False
-        where = self._where("r", start, end, sede_id)
+        where = self._where("r", start, end, self._sede_ids(params))
         family = SQL("r.family_id = %s", int(family_id)) if family_id else SQL("r.family_id IS NULL")
         sql_qty = SQL("COALESCE(sum(r.quantity) FILTER (WHERE r.sales_type = 'online'), 0) AS qty_online, "
                       "COALESCE(sum(r.quantity) FILTER (WHERE r.sales_type = 'pos'), 0) AS qty_pos, "

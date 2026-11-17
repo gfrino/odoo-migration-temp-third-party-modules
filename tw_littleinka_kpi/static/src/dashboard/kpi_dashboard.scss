@@ -58,9 +58,69 @@ $li-kpi-colors: (
         display: flex;
         gap: 6px;
         margin-top: 8px;
-        .form-control, .form-select { min-height: 36px; }
-        .form-select { max-width: 260px; }
+        flex-wrap: wrap;
+        .form-control { min-height: 36px; width: auto; }
     }
+    .o_li_kpi_sedi_btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 36px;
+        max-width: 100%;
+        border-radius: 999px;
+        white-space: nowrap;
+    }
+    // The list of sedi opens under the button, inside the header: nothing floats over the numbers.
+    .o_li_kpi_sedi {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+        gap: 2px 8px;
+        margin-top: 8px;
+        padding: 6px;
+        border: 1px solid var(--li-border);
+        border-radius: 12px;
+        background: var(--li-card);
+    }
+    .o_li_kpi_check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 40px;
+        padding: 4px 8px;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        span:not(.o_li_kpi_box) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        &:hover, &:focus-visible { background: rgba(0, 0, 0, .05); }
+        &[aria-checked="true"] { font-weight: 600; }
+        // Drawn here, not with an icon: Odoo's icon font has no empty check box.
+        .o_li_kpi_box {
+            position: relative;
+            flex: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--li-muted);
+            border-radius: 5px;
+        }
+        &[aria-checked="true"] .o_li_kpi_box {
+            border-color: $primary;
+            background: $primary;
+            &::after {
+                content: "";
+                position: absolute;
+                left: 5px;
+                top: 1px;
+                width: 6px;
+                height: 11px;
+                border: solid #fff;
+                border-width: 0 2px 2px 0;
+                transform: rotate(45deg);
+            }
+        }
+    }
+    .o_li_kpi_sedi_done { grid-column: 1 / -1; justify-self: end; border-radius: 999px; white-space: nowrap; }
 
     .o_li_kpi_section { margin-top: 18px; }
     .o_li_kpi_h2 {

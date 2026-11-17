@@ -4,6 +4,10 @@ Vendite di tutte le sedi in un'unica dashboard Odoo 20, pensata prima per il tel
 pezzi per famiglia (Poké, Sushi, Bevande, Dessert…) divisi tra online e cassa,
 fatturato, ordini, scontrino medio, sito/app e sedi. Ogni riquadro apre i dettagli.
 
+In alto il periodo e le sedi: il pulsante «Sedi» apre un elenco con le spunte, per vedere una sede,
+alcune o tutte («Tutte le sedi» comprende anche le casse senza sede). Con più sedi a schermo c'è il
+confronto «Sedi».
+
 ## Da dove arrivano i dati
 
 | Vendite | Sorgente | Come |

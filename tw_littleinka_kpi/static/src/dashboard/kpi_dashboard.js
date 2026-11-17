@@ -36,13 +36,17 @@ export class LittleInkaKpiDashboard extends Component {
         this.state = proxy({
             params: {
                 period: this.periods.some((p) => p.key === saved.period) ? saved.period : "today",
-                sede_id: parseInt(saved.sede) || false,
+                sede_ids: String(saved.sede || "")
+                    .split(",")
+                    .map((id) => parseInt(id))
+                    .filter((id) => id > 0),
                 date_from: saved.from || false,
                 date_to: saved.to || false,
             },
             data: null,
             detail: null,
             detailFamily: family,
+            sediOpen: false,
             loading: true,
         });
         // Coming back from a drill down (breadcrumb) restores period, sede and open family.
@@ -60,17 +64,17 @@ export class LittleInkaKpiDashboard extends Component {
         this.saveState();
     }
 
-    /** Period, sede and open family survive reloads and the breadcrumb (they go in the URL, as strings). */
+    /** Period, sedi and open family survive reloads and the breadcrumb (they go in the URL, as strings). */
     saveState() {
         this.props.updateActionState?.(this.flatState());
     }
 
     flatState() {
-        const { period, sede_id, date_from, date_to } = this.state.params;
+        const { period, sede_ids, date_from, date_to } = this.state.params;
         const family = this.state.detailFamily;
         const state = { period };
-        if (sede_id) {
-            state.sede = String(sede_id);
+        if (sede_ids.length) {
+            state.sede = sede_ids.join(",");
         }
         if (period === "custom") {
             state.from = date_from || "";
@@ -106,16 +110,31 @@ export class LittleInkaKpiDashboard extends Component {
         }
     }
 
-    onSede(ev) {
-        this.state.params.sede_id = parseInt(ev.target.value) || false;
+    isSedeSelected(sedeId) {
+        return this.state.params.sede_ids.includes(sedeId);
+    }
+
+    /** Tick or untick one sede in the filter: the numbers follow at once, the list stays open. */
+    toggleSede(sedeId) {
+        const selected = this.state.params.sede_ids;
+        this.state.params.sede_ids = selected.includes(sedeId)
+            ? selected.filter((id) => id !== sedeId)
+            : [...selected, sedeId];
         this.load();
     }
 
+    allSedi() {
+        this.state.params.sede_ids = [];
+        this.load();
+    }
+
+    /** A row of «Per sede»: show that sede alone. */
     pickSede(sedeId) {
         if (!sedeId) {
             return;
         }
-        this.state.params.sede_id = sedeId;
+        this.state.params.sede_ids = [sedeId];
+        this.state.sediOpen = false;
         this.load();
     }
 
@@ -183,9 +202,12 @@ export class LittleInkaKpiDashboard extends Component {
     }
 
     get sedeName() {
-        const data = this.state.data;
-        const sede = data?.sedi.find((s) => s.id === data.sede_id);
-        return sede ? sede.name : _t("Tutte le sedi");
+        const selected = this.state.params.sede_ids;
+        const names = (this.state.data?.sedi || []).filter((s) => selected.includes(s.id)).map((s) => s.name);
+        if (!names.length) {
+            return _t("Tutte le sedi");
+        }
+        return names.length <= 2 ? names.join(", ") : _t("%s sedi", names.length);
     }
 
     get families() {
@@ -227,8 +249,8 @@ export class LittleInkaKpiDashboard extends Component {
             ["date", ">=", data.utc_from],
             ["date", "<", data.utc_to],
         ];
-        if (data.sede_id) {
-            domain.push(["sede_id", "=", data.sede_id]);
+        if (data.sede_ids.length) {
+            domain.push(["sede_id", "in", data.sede_ids]);
         }
         return domain.concat(extra);
     }

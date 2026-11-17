@@ -20,8 +20,9 @@ Version History
   «Accessori» che raccoglie le categorie non riconosciute, così niente resta «Da assegnare»;
   prodotti con famiglia propria (sacchetti e posate venduti dal tasto «Extras»); una categoria
   nuova della cassa prende la famiglia della categoria madre.
+* 20.0.1.2.0: filtro delle sedi a scelta multipla (una, alcune o tutte) al posto del menù a tendina.
 """,
-    "version": "20.0.1.1.0",
+    "version": "20.0.1.2.0",
     "category": "Sales/Point of Sale",
     "author": "ticinoWEB",
     "website": "https://www.ticinoweb.com",
