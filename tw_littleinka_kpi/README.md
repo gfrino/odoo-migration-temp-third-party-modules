@@ -2,14 +2,16 @@
 
 Vendite di tutte le sedi in un'unica dashboard Odoo 20, pensata prima per il telefono:
 pezzi per famiglia (Poké, Sushi, Bevande, Dessert…) divisi tra online e cassa,
-fatturato, ordini, scontrino medio, sito/app/telefono e sedi. Ogni riquadro apre i dettagli.
+fatturato, ordini, scontrino medio, sito/app e sedi. Ogni riquadro apre i dettagli.
 
 ## Da dove arrivano i dati
 
 | Vendite | Sorgente | Come |
 |---|---|---|
-| Online (sito, app, telefono) | WooCommerce della sede, child theme Little Inka (`inc/odoo-kpi.php`) | POST `/tw_littleinka_kpi/v1/orders` con `Authorization: Bearer <chiave della sede>`, in coda (Action Scheduler) dopo ogni pagamento, cambio di stato e rimborso |
+| Online (sito, app) | WooCommerce della sede, child theme Little Inka (`inc/odoo-kpi.php`) | POST `/tw_littleinka_kpi/v1/orders` con `Authorization: Bearer <chiave della sede>`, in coda (Action Scheduler) dopo ogni pagamento, cambio di stato e rimborso |
 | Cassa | Punto vendita di Odoo | le casse (`pos.config`) collegate alla sede, ordini pagati o registrati |
+
+Gli ordini presi al telefono si battono in cassa: non esiste un canale «Telefono». Un ordine inserito a mano in WooCommerce conta come «Sito».
 
 Nessun dato personale dei clienti: il sito invia un codice anonimo (HMAC dell'e-mail), CAP e località.
 

@@ -4,7 +4,10 @@ from odoo import api, fields, models
 
 from .kpi_family import normalize_name
 
-CHANNELS = [("web", "Sito"), ("app", "App"), ("phone", "Telefono"), ("pos", "Cassa")]
+# Phone orders are typed into the till, so they are «Cassa»: there is no phone channel.
+# An order typed by hand in WooCommerce (the site still sends «phone») counts as «Sito».
+CHANNELS = [("web", "Sito"), ("app", "App"), ("pos", "Cassa")]
+ONLINE_CHANNELS = CHANNELS[:2]
 FULFILMENTS = [("delivery", "Consegna"), ("pickup", "Ritiro"), ("in_store", "In sede")]
 PAYMENT_GROUPS = [
     ("twint", "TWINT"),
@@ -63,7 +66,7 @@ class LittleInkaKpiOrder(models.Model):
     number = fields.Char("Ordine", required=True)
     state = fields.Char("Stato WooCommerce", index=True)
     is_counted = fields.Boolean("Conta nelle vendite", compute="_compute_is_counted", store=True, index=True)
-    channel = fields.Selection(CHANNELS[:3], string="Canale", required=True, default="web", index=True)
+    channel = fields.Selection(ONLINE_CHANNELS, string="Canale", required=True, default="web", index=True)
     fulfilment = fields.Selection(FULFILMENTS[:2], string="Consegna o ritiro", index=True)
     date_order = fields.Datetime("Data", required=True, index=True)
     date_paid = fields.Datetime("Pagato il")
@@ -124,7 +127,7 @@ class LittleInkaKpiOrder(models.Model):
             "external_id": int(data["id"]),
             "number": text(data.get("number"), 64) or str(data["id"]),
             "state": text(data.get("status"), 32),
-            "channel": channel if channel in dict(CHANNELS[:3]) else "web",
+            "channel": channel if channel in dict(ONLINE_CHANNELS) else "web",
             "fulfilment": fulfilment if fulfilment in dict(FULFILMENTS[:2]) else False,
             "date_order": parse_datetime(data.get("date_created")) or fields.Datetime.now(),
             "date_paid": parse_datetime(data.get("date_paid")),

@@ -8,15 +8,16 @@ Little Inka KPI
 Ogni sede WooCommerce (child theme Little Inka) invia i suoi ordini a Odoo con una
 chiave propria; le vendite in cassa arrivano dal Punto vendita. La dashboard le mette
 insieme sede per sede: pezzi venduti per famiglia (Poké, Sushi, Bevande, Dessert…),
-fatturato, ordini, scontrino medio, online contro cassa, sito/app/telefono, consegna
+fatturato, ordini, scontrino medio, online contro cassa, sito/app, consegna
 e ritiro. Ogni riquadro si tocca per vedere i dettagli.
 
 Version History
 ---------------
 * 20.0.1.0.0: prima versione (sedi con chiave, ricezione ordini, famiglie e categorie,
   analisi vendite e prodotti, dashboard per telefono e computer).
+* 20.0.1.0.1: tolto il canale «Telefono»: gli ordini al telefono si battono in cassa.
 """,
-    "version": "20.0.1.0.0",
+    "version": "20.0.1.0.1",
     "category": "Sales/Point of Sale",
     "author": "ticinoWEB",
     "website": "https://www.ticinoweb.com",

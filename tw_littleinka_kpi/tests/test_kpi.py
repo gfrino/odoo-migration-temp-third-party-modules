@@ -74,6 +74,13 @@ class TestLittleInkaKpi(HttpCase):
         self.assertEqual(counted.channel, "app")
         self.assertEqual(counted.line_ids.category_key, "poke bowl")
 
+        # There is no phone channel: an order typed by hand in WooCommerce counts as «Sito».
+        by_hand = _order(103, 15.0)
+        by_hand["channel"] = "phone"
+        self._post("orders", {"orders": [by_hand]})
+        self.assertEqual(self.env["tw.littleinka.kpi.order"].search([("external_id", "=", 103)]).channel, "web")
+        self.env["tw.littleinka.kpi.order"].search([("external_id", "=", 103)]).unlink()
+
         # The same order again (refunded in part) updates it instead of creating a copy.
         changed = _order(101, 30.0)
         changed["refunded"] = "10.00"
@@ -89,6 +96,7 @@ class TestLittleInkaKpi(HttpCase):
         dashboard = self.env["tw.littleinka.kpi.dashboard"]
         data = dashboard.get_data({"period": "custom", "date_from": "2026-11-12", "date_to": "2026-11-12", "sede_id": self.sede.id})
         self.assertAlmostEqual(data["totals"]["amount_online"], 20.0)
+        self.assertEqual([channel["key"] for channel in data["channels"]], ["web", "app", "pos"])
         self.assertEqual(data["totals"]["orders_online"], 1)
         poke = next(f for f in data["families"] if f["id"] == category.family_id.id)
         self.assertEqual(poke["qty_online"], 2)
